@@ -21,6 +21,7 @@ Magento version >= 2.3
   - Magento 2.2:  https://github.com/andreani-publico/magento-2.2
   
   
+  
 ## Instalación
 
 Para concretar la instalacion del módulo es necesario realizar los siguientes pasos. Primeramente, parados en la carpeta root del proyecto:
@@ -31,7 +32,7 @@ Para concretar la instalacion del módulo es necesario realizar los siguientes p
 	php bin/magento setup:upgrade
 	php bin/magento cache:clean
 ```
-3. Configure en el admin de Magento las credenciales. Lo encontrara en store -> configuration -> sales -> shipping methods (configuracion de contratos) y shipping settings (configuracion de nro de cliente y credenciales)
+
 
 
 
