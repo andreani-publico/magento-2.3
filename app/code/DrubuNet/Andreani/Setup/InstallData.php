@@ -71,27 +71,30 @@ class InstallData implements InstallDataInterface
         /** @var EavSetup $eavSetup */
         $eavSetup = $this->eavSetupFactory->create(['setup' => $setup]);
 
-        $eavSetup->addAttribute(
-            \Magento\Catalog\Model\Product::ENTITY,
-            'volumen',
-            [
-                'frontend'  => '',
-                'label'     => 'Volumen',
-                'input'     => 'text',
-                'class'     => '',
-                'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-                'visible'   => true,
-                'required'  => false,
-                'user_defined' => false,
-                'default'   => '',
-                'apply_to'  => '',
-                'visible_on_front'        => false,
-                'is_used_in_grid'         => false,
-                'is_visible_in_grid'      => false,
-                'is_filterable_in_grid'   => false,
-                'used_in_product_listing' => true
-            ]
-        );
+        /**Creacion del atributo volumen si no existe*/
+        if(!$eavSetup->getAttributeId(\Magento\Catalog\Model\Product::ENTITY, 'volumen')) {
+            $eavSetup->addAttribute(
+                \Magento\Catalog\Model\Product::ENTITY,
+                'volumen',
+                [
+                    'frontend' => '',
+                    'label' => 'Volumen',
+                    'input' => 'text',
+                    'class' => '',
+                    'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
+                    'visible' => true,
+                    'required' => false,
+                    'user_defined' => false,
+                    'default' => '',
+                    'apply_to' => '',
+                    'visible_on_front' => false,
+                    'is_used_in_grid' => false,
+                    'is_visible_in_grid' => false,
+                    'is_filterable_in_grid' => false,
+                    'used_in_product_listing' => true
+                ]
+            );
+        }
 
         /**
          * Atributos customer_address
@@ -105,7 +108,8 @@ class InstallData implements InstallDataInterface
         $attributeCustomerAddressSet        = $this->attributeSetFactory->create();
         $attributeCustomerAddressGroupId    = $attributeCustomerAddressSet->getDefaultGroupId($attributeCustomerAddressSetId);
 
-        $attributesAddressInfo = [
+        /**Este paso se movio al UpgradeData*/
+        /*$attributesAddressInfo = [
             'dni' => [
                 'label'     => 'DNI',
                 'type'      => 'int',
@@ -192,7 +196,6 @@ class InstallData implements InstallDataInterface
             ],
           
         ];
-
         foreach ($attributesAddressInfo as $attributeCode => $attributeParams) {
                 $customerAddressSetup->addAttribute(
                     'customer_address',
@@ -215,7 +218,9 @@ class InstallData implements InstallDataInterface
                 $customerAddressAttribute->save();
             
 
-        }
+        }*/
+
+
         $infoIdsAndreniProvincia =
             [
                 [ 'provincia_id'=>2, 'nombre' => 'BUENOS AIRES'],
