@@ -9,7 +9,7 @@ use Magento\Framework\View\Element\Template;
  *
  * @description Bloque para renderizar los planes de pago en el checkout
  *
- * @author Mauro Maximiliano Martinez <mmartinez@ids.net.ar>
+ * @author Drubu Team
  * @package DrubuNet\Andreani\Block
  */
 class Andreani extends Template

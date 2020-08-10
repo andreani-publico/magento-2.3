@@ -9,13 +9,14 @@ use Magento\Framework\Option\ArrayInterface;
  * @author Drubu Team
  * @package DrubuNet\Andreani\Model\Source
  */
-class WebserviceMethod implements ArrayInterface
+class TipoDocumento implements ArrayInterface
 {
     public function toOptionArray()
     {
         return [
-            'soap'    => 'SOAP',
-            'rest'     => 'REST',
+            'DNI'    => 'DNI',
+            'CUIT'     => 'CUIT',
+            'CUIL'     => 'CUIL',
         ];
     }
 }

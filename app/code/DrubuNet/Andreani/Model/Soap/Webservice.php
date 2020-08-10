@@ -236,7 +236,7 @@ class Webservice extends \DrubuNet\Andreani\Model\Soap\WsseAuthHeader
                         'ValorDeclarado'=> intval($params['bultos'][0]['valorDeclarado']),
                         'Volumen'       => intval($params['bultos'][0]['volumen']),
                     ]];
-            $helper->log("Parametros => " . print_r($params2,true),'paso_paso_cotizacion_andreani'.date('Y_m').'.log');
+            $helper->log("Parametros => " . print_r($params2,true),'andreani_errores_soap_'.date('Y_m').'.log');
 
             $phpresponse = $client->CotizarEnvio(
             [
@@ -251,6 +251,7 @@ class Webservice extends \DrubuNet\Andreani\Model\Soap\WsseAuthHeader
                     'Volumen'       => intval($params['bultos'][0]['volumen']),
                 ]
             ]);
+            $helper->log("Respuesta => " . print_r($phpresponse->CotizarEnvioResult->Tarifa,true),'andreani_errores_soap_'.date('Y_m').'.log');
 
             $costoEnvio  = floatval($phpresponse->CotizarEnvioResult->Tarifa);
 
@@ -258,9 +259,9 @@ class Webservice extends \DrubuNet\Andreani\Model\Soap\WsseAuthHeader
 
         } catch (SoapFault $e) {
             if($helper->getDebugHabilitado())
-                $helper->log($e,'erorres_andreani_webservice_'.date('Y_m').'.log');
+                $helper->log($e,'andreani_errores_soap_'.date('Y_m').'.log');
             else
-                $helper->log($e->getMessage(),'erorres_andreani_webservice_'.date('Y_m').'.log');
+                $helper->log($e->getMessage(),'andreani_errores_soap_'.date('Y_m').'.log');
         }
     }
 
@@ -424,9 +425,9 @@ class Webservice extends \DrubuNet\Andreani\Model\Soap\WsseAuthHeader
 
         } catch (SoapFault $e) {
             if($helper->getDebugHabilitado())
-                $helper->log($e,'erorres_andreani_webservice_'.date('Y_m').'.log');
+                $helper->log($e,'andreani_errores_soap_'.date('Y_m').'.log');
             else
-                $helper->log($e->getMessage(),'erorres_andreani_webservice_'.date('Y_m').'.log');
+                $helper->log($e->getMessage(),'andreani_errores_soap_'.date('Y_m').'.log');
         }
     }
 

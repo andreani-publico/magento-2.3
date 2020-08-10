@@ -218,127 +218,133 @@ class AndreaniEstandar extends AbstractCarrierOnline implements CarrierInterface
         $method->setMethod(self::METHOD_CODE);
         $method->setMethodTitle($this->getConfigData('description'));
 
-        //Calculo de volumen y valor de producto
+        try {
+            //Calculo de volumen y valor de producto
 
-        $volumen = 0;
-        $valorProductos = 0;
+            $volumen = 0;
+            $valorProductos = 0;
 
-        $helper = $this->_andreaniHelper;
-        $webservice = $this->_webService;
+            $helper = $this->_andreaniHelper;
+            $webservice = $this->_webService;
 
-        foreach($request->getAllItems() as $_item)
-        {
-            if($_item->getProductType() == 'configurable')
-                continue;
+            foreach ($request->getAllItems() as $_item) {
+                if ($_item->getProductType() == 'configurable')
+                    continue;
 
-            $_producto = $_item->getProduct();
+                $_producto = $_item->getProduct();
 
-            if($_item->getParentItem())
-                $_item = $_item->getParentItem();
+                if ($_item->getParentItem())
+                    $_item = $_item->getParentItem();
 
-            $volumen += (int) $_producto->getResource()
-                    ->getAttributeRawValue($_producto->getId(),'volumen',$_producto->getStoreId()) * $_item->getQty();
+                $volumen += (int)$_producto->getResource()
+                        ->getAttributeRawValue($_producto->getId(), 'volumen', $_producto->getStoreId()) * $_item->getQty();
 
-            if($_producto->getCost())
-                $valorProductos += $_producto->getCost() * $_item->getQty();
-            else
-                $valorProductos += $_item->getPrice() * $_item->getQty();
-        }
-
-        $pesoTotal  = $request->getPackageWeight();//Peso del producto en kgs
-
-
-        /*$amount = $this->getShippingPrice();
-
-        $method->setPrice($amount);
-        $method->setCost($amount);
-
-        $result->append($method);*/
-
-        $costoEnvio = false;
-
-        if($pesoTotal > (int)$helper->getPesoMaximo())
-        {
-            $error = $this->_rateErrorFactory->create();
-            $error->setCarrier($this->_code);
-            $error->setCarrierTitle($this->getConfigData('title'));
-            $error->setErrorMessage(__('Su pedido supera el peso máximo permitido por Andreani. Por favor divida su orden en más pedidos o consulte al administrador de la tienda.'));
-
-            return $error;
-        }
-
-        if($request->getFreeShipping() === true)
-        {
-            $method->setPrice(0);
-            $method->setCost(0);
-
-            $result->append($method);
-        }
-        else
-        {
-            if($helper->getTipoCotizacion() == $helper::COTIZACION_ONLINE)
-            {
-                /*$costoEnvio = $webservice->cotizarEnvio(
-                    [
-                        'cpDestino'     => $request->getDestPostcode(),
-                        'peso'          => $pesoTotal,
-                        'valorDeclarado'=> $valorProductos,
-                        'volumen'       => $volumen
-                    ],$this->_code);*/
-                $params = array(
-                    "cpDestino" => $request->getDestPostcode(),
-                    "contrato" => utf8_encode($helper->getEstandarContrato())/*"300006611"*/,
-                    "cliente" => utf8_encode($helper->getNroCliente())/*"CL0003750"*/,
-                    "sucursalOrigen" => "",
-                    "bultos" => array(
-                        0 => array(
-                            "valorDeclarado" => $valorProductos,
-                            "volumen" => $volumen,
-                            "kilos" => $pesoTotal
-                        )
-                    )
-                );
-
-                if($helper->getWebserviceMethod() == 'soap'){
-                    $costoEnvio = $this->soapService->cotizarEnvio($params,self::CARRIER_CODE);
-                }
-                else {
-                    $costoEnvio = $webservice->cotizarEnvio($params);
-                    $costoEnvio = $costoEnvio['tarifaConIva']['total'];
-                }
-
-            }
-            elseif($helper->getTipoCotizacion() == $helper::COTIZACION_TABLA)
-            {
-                /** @var $tarifa \DrubuNet\Andreani\Model\Tarifa */
-                $tarifa = $this->_tarifaFactory->create();
-
-                $costoEnvio = $tarifa->cotizarEnvio(
-                    [
-                        'cpDestino'     => $request->getDestPostcode(),
-                        'peso'          => $pesoTotal,
-                        'tipo'          => $this->_code
-                    ]);
+                if ($_producto->getCost())
+                    $valorProductos += $_producto->getCost() * $_item->getQty();
+                else
+                    $valorProductos += $_item->getPrice() * $_item->getQty();
             }
 
-            if($costoEnvio)
-            {
-                $method->setPrice($costoEnvio);
-                $method->setCost($costoEnvio);
+            $pesoTotal = $request->getPackageWeight();//Peso del producto en kgs
 
-                $result->append($method);
-            }
-            else
-            {
+
+            /*$amount = $this->getShippingPrice();
+
+            $method->setPrice($amount);
+            $method->setCost($amount);
+
+            $result->append($method);*/
+
+            $costoEnvio = false;
+
+            if ($pesoTotal > (int)$helper->getPesoMaximo()) {
                 $error = $this->_rateErrorFactory->create();
                 $error->setCarrier($this->_code);
                 $error->setCarrierTitle($this->getConfigData('title'));
-                $error->setErrorMessage(__('No existen cotizaciones para el código postal ingresado'));
+                $error->setErrorMessage(__('Su pedido supera el peso máximo permitido por Andreani. Por favor divida su orden en más pedidos o consulte al administrador de la tienda.'));
 
-                $result->append($error);
+                return $error;
             }
-        }
 
+            if ($request->getFreeShipping() === true) {
+                $method->setPrice(0);
+                $method->setCost(0);
+
+                $result->append($method);
+            } else {
+                if ($helper->getTipoCotizacion() == $helper::COTIZACION_ONLINE) {
+                    /*$costoEnvio = $webservice->cotizarEnvio(
+                        [
+                            'cpDestino'     => $request->getDestPostcode(),
+                            'peso'          => $pesoTotal,
+                            'valorDeclarado'=> $valorProductos,
+                            'volumen'       => $volumen
+                        ],$this->_code);*/
+                    $params = array(
+                        "cpDestino" => $request->getDestPostcode(),
+                        "contrato" => utf8_encode($helper->getEstandarContrato())/*"300006611"*/,
+                        "cliente" => utf8_encode($helper->getNroCliente())/*"CL0003750"*/,
+                        "sucursalOrigen" => "",
+                        "bultos" => array(
+                            0 => array(
+                                "valorDeclarado" => $valorProductos,
+                                "volumen" => $volumen,
+                                "kilos" => $pesoTotal
+                            )
+                        )
+                    );
+
+                    if ($helper->getWebserviceMethod() == 'soap') {
+                        $costoEnvio = $this->soapService->cotizarEnvio($params, self::CARRIER_CODE);
+                    } else {
+                        $response = $webservice->cotizarEnvio($params);
+                        if (array_key_exists('status',$response) && $response['status'] != 200) {
+                            $error = $this->_rateErrorFactory->create();
+                            $error->setCarrier($this->_code);
+                            $error->setCarrierTitle($this->getConfigData('title'));
+                            $error->setErrorMessage(__('Hubo un error obteniendo la cotizacion'));
+                            $result->append($error);
+                            return $result;
+                        }
+
+                        $costoEnvio = $response['tarifaConIva']['total'];
+                    }
+
+                } elseif ($helper->getTipoCotizacion() == $helper::COTIZACION_TABLA) {
+                    /** @var $tarifa \DrubuNet\Andreani\Model\Tarifa */
+                    $tarifa = $this->_tarifaFactory->create();
+
+                    $costoEnvio = $tarifa->cotizarEnvio(
+                        [
+                            'cpDestino' => $request->getDestPostcode(),
+                            'peso' => $pesoTotal,
+                            'tipo' => $this->_code
+                        ]);
+                }
+
+                if ($costoEnvio) {
+                    $method->setPrice($costoEnvio);
+                    $method->setCost($costoEnvio);
+
+                    $result->append($method);
+                } else {
+                    $error = $this->_rateErrorFactory->create();
+                    $error->setCarrier($this->_code);
+                    $error->setCarrierTitle($this->getConfigData('title'));
+                    $error->setErrorMessage(__('No existen cotizaciones para el código postal ingresado'));
+
+                    $result->append($error);
+                }
+            }
+        }catch (\Exception $exception){
+            \DrubuNet\Andreani\Helper\Data::log($exception->getMessage(),'andreani_errores_cotizacion_' . date('Y_m') . '.log');
+            $error = $this->_rateErrorFactory->create();
+            $error->setCarrier($this->_code);
+            $error->setCarrierTitle($this->getConfigData('title'));
+            $error->setErrorMessage(__('Hubo un error obteniendo la cotizacion.'));
+
+            return $error;
+        }
         return $result;
     }
 

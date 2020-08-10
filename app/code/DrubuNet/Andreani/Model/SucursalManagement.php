@@ -81,16 +81,48 @@ class SucursalManagement implements SucursalManagementInterface
                     }
                 }
             }catch (\Exception $e){
-                \DrubuNet\Andreani\Helper\Data::log($e->getMessage() . " - Sucursales obtenidas: " . print_r($sucursales,true),'error_andreani_fetchSucursales_' . date('Y_m') . '.log');
+                \DrubuNet\Andreani\Helper\Data::log($e->getMessage() . " - Sucursales obtenidas: " . print_r($sucursales,true),'andreani_error_fetchSucursales_' . date('Y_m') . '.log');
                 throw new \Exception("Error : " . $e->getMessage());
             }
         }
         else {
-            $sucursales = $this->webservice->getSucursales();
-            $needFilter = (!is_null($region) || !is_null($location));
+            if(true){//v2
+                $sucursales = $this->webservice->getSucursales();
+                $needFilter = (!is_null($region) || !is_null($location));
 
-            foreach ($sucursales as $item_sucursal) {
-                try {
+                foreach ($sucursales as $item_sucursal) {
+                    /*if((!array_key_exists('localidad',$item_sucursal["direccion"]) || empty($item_sucursal["direccion"]['localidad'])) || (!array_key_exists('provincia',$item_sucursal["direccion"]) || empty($item_sucursal["direccion"]['provincia']))){
+                        continue;
+                    }*/
+                    if(!array_key_exists('localidad',$item_sucursal["direccion"]) || empty($item_sucursal["direccion"]['localidad']) ){
+                        continue;
+                    }
+                    if(!array_key_exists('provincia',$item_sucursal["direccion"]) || empty($item_sucursal["direccion"]['provincia']) ){
+                        continue;
+                    }
+                    if ($needFilter) {
+                        if ((!is_null($region) && strtoupper($region) != strtoupper($item_sucursal["direccion"]['provincia'])) || (!is_null($location) && strtoupper($location) != strtoupper($item_sucursal["direccion"]['localidad'])))
+                            continue;
+                    }
+                    $sucursal = $this->sucursalFactory->create();
+                    $sucursal->setId($item_sucursal["id"]);
+                    $sucursal->setCode($item_sucursal["codigo"]);
+                    $sucursal->setStreet(
+                        $item_sucursal["direccion"]['calle'] . ' ' . $item_sucursal["direccion"]['numero']
+                    );
+                    $sucursal->setPostcode($item_sucursal["direccion"]['codigoPostal']);
+                    $sucursal->setLocation($item_sucursal["direccion"]['localidad']);
+                    $sucursal->setRegion($item_sucursal["direccion"]['provincia']);
+                    $sucursal->setName("{$sucursal->getStreet()} , {$sucursal->getPostcode()} , {$sucursal->getLocation()} , {$sucursal->getRegion()}");
+                    //calle altura , CP , Localidad , Region
+                    $result[] = $sucursal;
+                }
+            }
+            else {//v1
+                $sucursales = $this->webservice->getSucursales();
+                $needFilter = (!is_null($region) || !is_null($location));
+
+                foreach ($sucursales as $item_sucursal) {
                     if ($needFilter) {
                         if ((!is_null($region) && strtoupper($region) != strtoupper($item_sucursal["direccion"]['region'])) || (!is_null($location) && strtoupper($location) != strtoupper($item_sucursal["direccion"]['localidad'])))
                             continue;
@@ -107,8 +139,6 @@ class SucursalManagement implements SucursalManagementInterface
                     $sucursal->setName("{$sucursal->getStreet()} , {$sucursal->getPostcode()} , {$sucursal->getLocation()} , {$sucursal->getRegion()}");
                     //calle altura , CP , Localidad , Region
                     $result[] = $sucursal;
-                } catch (\Exception $e) {
-                    throw new \Exception("Message : " . $e->getMessage() . ' - data : ' . print_r($item_sucursal, true));
                 }
             }
         }
@@ -135,11 +165,23 @@ class SucursalManagement implements SucursalManagementInterface
             }
         }
         else {
-            $regions = $this->webservice->getRegions();
-            foreach ($regions as $item) {
-                $provincia = $this->provinciaFactory->create();
-                $provincia->setName($item['contenido']);
-                $result[] = $provincia;
+            if(true){//v2
+                $sucursales = $this->fetchSucursales(null,null);
+                foreach ($sucursales as $sucursal) {
+                    if(!array_key_exists($sucursal->getRegion(),$result)) {
+                        $provincia = $this->provinciaFactory->create();
+                        $provincia->setName($sucursal->getRegion());
+                        $result[$sucursal->getRegion()] = $provincia;
+                    }
+                }
+            }
+            else{//v1
+                $regions = $this->webservice->getRegions();
+                foreach ($regions as $item) {
+                    $provincia = $this->provinciaFactory->create();
+                    $provincia->setName($item['contenido']);
+                    $result[] = $provincia;
+                }
             }
         }
         usort($result, [$this, "_fieldCompare"]);

@@ -141,6 +141,88 @@
                     <label>Mostrar calculador en la pagina de producto</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
+                <field id="tipo_ws" translate="label" type="select" sortOrder="81" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Consumir servicio:</label>
+                    <source_model>DrubuNet\Andreani\Model\Source\WebserviceMethod</source_model>
+                </field>
+                <group id="andreani_datos_origen" translate="label" type="text" sortOrder="402" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Datos del origen del envio</label>
+                    <field id="calle" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Calle</label>
+                        <comment><![CDATA[Calle del origen del envio. <strong>Obligatorio</strong>]]></comment>
+                        <validate>required-entry</validate>
+                    </field>
+                    <field id="numero" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Altura</label>
+                        <comment><![CDATA[Altura de la calle del origen del envio. <strong>Obligatorio</strong>]]></comment>
+                        <validate>required-entry</validate>
+                    </field>
+                    <field id="entreCalle" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Entre calles</label>
+                        <comment><![CDATA[Entre calles de la calle del origen del envio. <strong>Opcional.</strong>]]></comment>
+                    </field>
+                    <field id="piso" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Piso</label>
+                        <comment><![CDATA[Piso de la calle del origen del envio. <strong>Opcional.</strong>]]></comment>
+                    </field>
+                    <field id="departamento" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Departamento</label>
+                        <comment><![CDATA[Departamento de la calle del origen del envio. <strong>Opcional.</strong>]]></comment>
+                    </field>
+                    <field id="codigoPostal" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Codigo Postal</label>
+                        <comment><![CDATA[Código postal origen del envío. <strong>Obligatorio</strong>]]></comment>
+                        <validate>required-entry</validate>
+                    </field>
+                    <field id="localidad" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Localidad</label>
+                        <comment><![CDATA[Localidad origen del envío. <strong>Obligatorio</strong>]]></comment>
+                        <validate>required-entry</validate>
+                    </field>
+                    <field id="region" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Region</label>
+                        <comment><![CDATA[Región destino del envío codificado en ISO 3166-2:AR. <strong>Opcional</strong>]]></comment>
+                    </field>
+                    <field id="pais" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Pais</label>
+                        <comment><![CDATA[País destino del envío. <strong>Opcional. Por defecto Argentina.</strong>]]></comment>
+                    </field>
+                </group>
+                <group id="andreani_datos_remitente" translate="label" type="text" sortOrder="402" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Datos del remitente</label>
+                    <field id="nombreCompleto" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Nombre completo</label>
+                        <comment><![CDATA[Nombre o razón social del remitente del envío. <strong>Obligatorio</strong>]]></comment>
+                        <validate>required-entry</validate>
+                    </field>
+                    <field id="eMail" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Email</label>
+                        <comment><![CDATA[Correo electrónico del remitente del envío. <strong>Obligatorio</strong>]]></comment>
+                        <validate>required-entry</validate>
+                    </field>
+                    <field id="documentoTipo" translate="label" type="select" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Documento tipo</label>
+                        <comment><![CDATA[Tipo de documento del remitente del envío. <strong>Obligatorio.</strong>]]></comment>
+                        <source_model>DrubuNet\Andreani\Model\Source\TipoDocumento</source_model>
+                        <validate>required-entry</validate>
+                    </field>
+                    <field id="documentoNumero" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Numero de documento</label>
+                        <comment><![CDATA[Numero de documento del remitente del envío. <strong>Obligatorio.</strong>]]></comment>
+                        <validate>required-entry</validate>
+                    </field>
+                    <field id="telefonoTipo" translate="label" type="select" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Tipo telefono</label>
+                        <comment><![CDATA[Tipo de telefono del remitente del envío. <strong>Obligatorio.</strong>]]></comment>
+                        <source_model>DrubuNet\Andreani\Model\Source\TipoTelefono</source_model>
+                        <validate>required-entry</validate>
+                    </field>
+                    <field id="telefonoNumero" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Numero telefono</label>
+                        <comment><![CDATA[Numero de telefono del remitente del envío. <strong>Obligatorio</strong>]]></comment>
+                        <validate>required-entry</validate>
+                    </field>
+                </group>
 
                 <group id="andreani_ws_prod_urls" translate="label" type="text" sortOrder="402" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Andreani Urls WS producción</label>

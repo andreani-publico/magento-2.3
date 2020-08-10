@@ -20,11 +20,11 @@ define(
              * Get nearest machine list for specified address
              * @param {Object} address
              */
-            getSucursalList: function (address, form) {
+            getSucursalList: function (address, form, andreanisucursal_provincia, andreanisucursal_localidad) {
                 shippingService.isLoading(true);
-                var cacheKey = address.getCacheKey() + "_" + quote.shippingAddress().extensionAttributes.andreanisucursal_provincia + "_" + quote.shippingAddress().extensionAttributes.andreanisucursal_localidad,
+                var cacheKey = address.getCacheKey() + "_" + andreanisucursal_provincia + "_" + andreanisucursal_localidad,
                     cache = sucursalesRegistry.get(cacheKey),
-                    serviceUrl = resourceUrlManager.getUrlForSucursalList(quote);
+                    serviceUrl = resourceUrlManager.getUrlForSucursalList(andreanisucursal_provincia,andreanisucursal_localidad);
 
                 if (cache) {
                     form.setSucursalList(cache);
@@ -36,9 +36,12 @@ define(
                         function (result) {
                             sucursalesRegistry.set(cacheKey, result);
                             form.setSucursalList(result);
+                            $('#andreanisucursal-errores').hide();
                         }
                     ).fail(
                         function (response) {
+                            $('#andreanisucursal-errores > span').text('Hubo un error obteniendo las sucursales');
+                            $('#andreanisucursal-errores').show();
                             errorProcessor.process(response);
                         }
                     ).always(
@@ -68,9 +71,13 @@ define(
                         function (result) {
                             provinciasRegistry.set(cacheKey, result);
                             form.setProvinciaList(result);
+                            $('#andreanisucursal-errores').hide();
                         }
                     ).fail(
                         function (response) {
+                            $('#andreanisucursal-errores > span').text('Hubo un error obteniendo las sucursales');
+                            $('#andreanisucursal-errores').show();
+
                             errorProcessor.process(response);
                         }
                     ).always(
@@ -81,11 +88,11 @@ define(
                 }
             },
 
-            getLocalidadList: function (address, form) {
+            getLocalidadList: function (address, form, andreanisucursal_provincia) {
                 shippingService.isLoading(true);
-                var cacheKey = address.getCacheKey() + "_" + quote.shippingAddress().extensionAttributes.andreanisucursal_provincia,
+                var cacheKey = address.getCacheKey() + "_" + andreanisucursal_provincia,
                     cache = provinciasRegistry.get(cacheKey),
-                    serviceUrl = resourceUrlManager.getUrlForLocalidadList(quote);
+                    serviceUrl = resourceUrlManager.getUrlForLocalidadList(andreanisucursal_provincia);
 
                 if (cache) {
                     form.setLocalidadList(cache);
@@ -97,9 +104,12 @@ define(
                         function (result) {
                             provinciasRegistry.set(cacheKey, result);
                             form.setLocalidadList(result);
+                            $('#andreanisucursal-errores').hide();
                         }
                     ).fail(
                         function (response) {
+                            $('#andreanisucursal-errores > span').text('Hubo un error obteniendo las sucursales');
+                            $('#andreanisucursal-errores').show();
                             errorProcessor.process(response);
                         }
                     ).always(
@@ -115,23 +125,6 @@ define(
                 //var cacheKey = address.getCacheKey() + "_cotizacion_" + quote.shippingAddress().extensionAttributes.andreanisucursal_provincia + "_" + quote.shippingAddress().extensionAttributes.andreanisucursal_localidad,
                     //cache = sucursalesRegistry.get(cacheKey),
                 var serviceUrl = resourceUrlManager.getUrlForCotizacionSucursal(quote);
-/*                storage.post(
-                    '%URL for shipping rate estimation%',
-                    JSON.stringify({
-                        // '%address parameters%'
-                    }),
-                    false
-                )
- */
-
-                var settings2 = {
-                    "url": "http://127.0.0.1/rest/default/V1/module/get-cotizacion-sucursal",
-                    "method": "POST",
-                    "headers": {
-                        "Content-Type": "application/json"
-                    },
-                    "data": JSON.stringify({"sucursal":form.getSucursal()}),
-                };
                 storage.post(
                     serviceUrl,
                     JSON.stringify({"sucursal":form.getSucursal()}),
@@ -140,9 +133,11 @@ define(
                     .done(function (response) {
                         let costoEnvio = priceUtils.formatPrice(response[0].shippingPrice, quote.getPriceFormat());
                         jQuery(jQuery(jQuery("#label_method_sucursal_andreanisucursal").parent()[0].childNodes[3]).children('span')).text(costoEnvio)
+                        $('#andreanisucursal-errores').hide();
                     })
                     .fail(function (response) {
-                        alert("Ocurrio un error obteniendo la cotizacion. Intentelo mas tarde")
+                        $('#andreanisucursal-errores > span').text('Hubo un error obteniendo la cotizacion');
+                        $('#andreanisucursal-errores > span').show();
                     })
                     .always(function () {
                         shippingService.isLoading(false);

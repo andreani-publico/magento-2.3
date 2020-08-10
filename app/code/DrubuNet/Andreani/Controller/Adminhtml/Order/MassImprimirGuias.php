@@ -65,7 +65,12 @@ class MassImprimirGuias extends \Magento\Sales\Controller\Adminhtml\Order\Abstra
             {
                 $guiaContent = $order->getAndreaniDatosGuia();
                 if ($guiaContent) {
-                    $guiasContent[$order->getIncrementId()] = json_decode(unserialize($guiaContent));
+                    if($this->_andreaniHelper->getWebserviceMethod() == 'soap') {
+                        $guiasContent[$order->getIncrementId()] = json_decode(unserialize($guiaContent));
+                    }
+                    else{
+                        $guiasContent[$order->getIncrementId()] = json_decode($guiaContent,true);
+                    }
                 }
             }
 
@@ -76,7 +81,15 @@ class MassImprimirGuias extends \Magento\Sales\Controller\Adminhtml\Order\Abstra
                  */
                 if (!empty($guiasContent))
                 {
-                    $this->_generarGuias($guiasContent,$collection->getAllIds());
+                    $result = $this->_generarGuias($guiasContent,$collection->getAllIds());
+                    if(is_bool($result) && !$result){
+                        $this->messageManager->addErrorMessage(__('Hubo un problema imprimiendo las guías. Inténtelo de nuevo.'));
+                        return $this->resultRedirectFactory->create()->setPath($this->getComponentRefererUrl());
+                    }
+                    if(is_string($result)){
+                        $this->messageManager->addErrorMessage(__('Hubo un problema imprimiendo las guías. ' . $result));
+                        return $this->resultRedirectFactory->create()->setPath($this->getComponentRefererUrl());
+                    }
                 } else {
                     $this->messageManager->addErrorMessage(__('No hay guías creadas para las órdenes seleccionadas.'));
                     return $this->resultRedirectFactory->create()->setPath($this->getComponentRefererUrl());
@@ -120,8 +133,13 @@ class MassImprimirGuias extends \Magento\Sales\Controller\Adminhtml\Order\Abstra
              */
             foreach($guiasContent AS $key => $guiaData)
             {
-                $object = $guiaData->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
-                $helper->crearCodigoDeBarras($object->NumeroAndreani);
+                if($this->_andreaniHelper->getWebserviceMethod() == 'soap') {
+                    $object = $guiaData->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
+                    $helper->crearCodigoDeBarras($object->NumeroAndreani);
+                }
+                else{
+                    $helper->crearCodigoDeBarras($guiaData['response']['bultos'][0]['numeroDeEnvio']);
+                }
             }
 
             $pdfName        = 'guia_masiva_'.date_timestamp_get(date_create());
@@ -149,17 +167,26 @@ class MassImprimirGuias extends \Magento\Sales\Controller\Adminhtml\Order\Abstra
              * que se encarga de generar la guía en HTML. El tercer parámetro
              * fuerza la descarga (D) o fuerza el almacenamiento en el filesystem (F)
              */
-            if($helper->generateHtml2Pdf($pdfName,$html,'D'))
+            $result = $helper->generateHtml2Pdf($pdfName,$html,'D');
+            if(is_bool($result) && $result)
             {
                 foreach($guiasContent AS $key => $guiaData)
                 {
-                    $object  = $guiaData->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
-                    unlink($helper->getDirectoryPath('media')."/andreani/".$object->NumeroAndreani.'.png');
+                    if($this->_andreaniHelper->getWebserviceMethod() == 'soap') {
+                        $object = $guiaData->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
+                        unlink($helper->getDirectoryPath('media') . "/andreani/" . $object->NumeroAndreani . '.png');
+                    }
+                    else{
+                        unlink($helper->getDirectoryPath('media') . "/andreani/" . $guiaData['response']['bultos'][0]['numeroDeEnvio'] . '.png');
+                    }
                 }
+            }
+            else{
+                return $result;
             }
 
         } catch (\Exception $e) {
-            $this->messageManager->addError(__('Hubo un problema imprimiendo las guías. Inténtelo de nuevo.'));
+            return $e->getMessage();
         }
     }
 

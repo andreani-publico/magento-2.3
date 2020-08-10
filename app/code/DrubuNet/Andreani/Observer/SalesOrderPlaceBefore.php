@@ -85,7 +85,7 @@ class SalesOrderPlaceBefore implements ObserverInterface
         $order->setCustomerDni($shippingAddress->getDni());
 
         //Guardo los atributos custom en la direccion del usuario
-        if(!empty($order->getCustomerId())){
+        if(!empty($order->getCustomerId()) && !empty($shippingAddress->getCustomerAddressId())){
             $customerAddress = $this->addressRepository->getById($shippingAddress->getCustomerAddressId());
             $hasChange = false;
             $customAttributes = $customerAddress->getCustomAttributes();

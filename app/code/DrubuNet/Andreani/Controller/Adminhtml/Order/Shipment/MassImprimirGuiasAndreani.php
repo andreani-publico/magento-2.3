@@ -178,19 +178,6 @@ class MassImprimirGuiasAndreani extends \Magento\Sales\Controller\Adminhtml\Orde
                      *
                      */
                     $leftShipments = false;
-//                    foreach($order->getAllItems() AS $key => $orderItem)
-//                    {
-//                        $this->_andreaniHelper::log('paso 5 - bucle de items', 'andreanidrubutest.log');
-//                        $this->_andreaniHelper::log(print_r($orderItem->getSku(), true), 'andreanidrubutest.log');
-//                        $this->_andreaniHelper::log(print_r($orderItem->getQtyOrdered(), true), 'andreanidrubutest.log');
-//                        $this->_andreaniHelper::log(print_r($orderItem->getQtyShipped(), true), 'andreanidrubutest.log');
-//                        if((int)$orderItem->getQtyOrdered() != (int)$orderItem->getQtyShipped())
-//                        {
-//                            $this->_andreaniHelper::log('paso 6 - leftshiptment en true', 'andreanidrubutest.log');
-//                            $leftShipments = true;
-//                            break;
-//                        }
-//                    }
                     /**
                      * Si la orden no tiene envíos, lo genera.
                      */
@@ -200,9 +187,7 @@ class MassImprimirGuiasAndreani extends \Magento\Sales\Controller\Adminhtml\Orde
                             $result = $this->_guiasMasivas->doShipmentRequest($order);
 
                             if(is_bool($result) && !$result){
-                                //$this->_andreaniHelper::log($order->getIncrementId() . " falla en el result ", 'andreanidrubutest.log');
                                 $this->messageManager->addErrorMessage(__("Error al generar la guia para la orden " . $order->getIncrementId() . ' No se puede crear el shipment.'));
-                                //continue;
                             }
                             else if($result instanceof \Magento\Framework\DataObject){
                                 $this->messageManager->addErrorMessage(__("Error al generar la guia para la orden " . $order->getIncrementId() . ' - ' . $result->getErrors()));
@@ -254,7 +239,12 @@ class MassImprimirGuiasAndreani extends \Magento\Sales\Controller\Adminhtml\Orde
                 {
                     $guiaContent = $shipment->getAndreaniDatosGuia();
                     if ($guiaContent) {
-                        $guiasContent[$shipment->getIncrementId()] = json_decode(unserialize($guiaContent));
+                        if($this->_andreaniHelper->getWebserviceMethod() == 'soap') {
+                            $guiasContent[$shipment->getIncrementId()] = json_decode(unserialize($guiaContent));
+                        }
+                        else{
+                            $guiasContent[$shipment->getIncrementId()] = json_decode($guiaContent,true);
+                        }
                     }
                 }
             }
@@ -306,8 +296,14 @@ class MassImprimirGuiasAndreani extends \Magento\Sales\Controller\Adminhtml\Orde
              */
             foreach($guiasContent AS $key => $guiaData)
             {
-                $object = $guiaData->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
-                $helper->crearCodigoDeBarras($object->NumeroAndreani);
+                if($this->_andreaniHelper->getWebserviceMethod() == 'soap') {
+                    $object = $guiaData->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
+                    $helper->crearCodigoDeBarras($object->NumeroAndreani);
+                }
+                else{
+                    $numeroDeEnvio = $guiaData['response']['bultos'][0]['numeroDeEnvio'];
+                    $helper->crearCodigoDeBarras($numeroDeEnvio);
+                }
             }
 
             $pdfName        = 'guia_masiva_'.date_timestamp_get(date_create());
@@ -374,8 +370,14 @@ class MassImprimirGuiasAndreani extends \Magento\Sales\Controller\Adminhtml\Orde
 
                 foreach($guiasContent AS $key => $guiaData)
                 {
-                    $object  = $guiaData->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
-                    unlink($helper->getDirectoryPath('media')."/andreani/".$object->NumeroAndreani.'.png');
+                    if($this->_andreaniHelper->getWebserviceMethod() == 'soap'){
+                        $object  = $guiaData->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
+                        unlink($helper->getDirectoryPath('media')."/andreani/".$object->NumeroAndreani.'.png');
+                    }
+                    else{
+                        $numeroDeEnvio = $guiaData['response']['bultos'][0]['numeroDeEnvio'];
+                        unlink($helper->getDirectoryPath('media')."/andreani/".$numeroDeEnvio.'.png');
+                    }
                 }
             }
 
@@ -414,8 +416,15 @@ class MassImprimirGuiasAndreani extends \Magento\Sales\Controller\Adminhtml\Orde
              */
             foreach($guiasContent AS $key => $guiaData)
             {
-                $object = $guiaData->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
-                $helper->crearCodigoDeBarras($object->NumeroAndreani);
+
+                if($this->_andreaniHelper->getWebserviceMethod() == 'soap'){
+                    $object = $guiaData->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
+                    $helper->crearCodigoDeBarras($object->NumeroAndreani);
+                }
+                else{
+                    $numeroDeEnvio = $guiaData['response']['bultos'][0]['numeroDeEnvio'];
+                    $helper->crearCodigoDeBarras($numeroDeEnvio);
+                }
             }
 
             /**
@@ -486,8 +495,14 @@ class MassImprimirGuiasAndreani extends \Magento\Sales\Controller\Adminhtml\Orde
 
                     foreach($guiasContent AS $key => $guiaData)
                     {
-                        $object  = $guiaData->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
-                        unlink($helper->getDirectoryPath('media')."/andreani/".$object->NumeroAndreani.'.png');
+                        if($this->_andreaniHelper->getWebserviceMethod() == 'soap'){
+                            $object  = $guiaData->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
+                            unlink($helper->getDirectoryPath('media')."/andreani/".$object->NumeroAndreani.'.png');
+                        }
+                        else{
+                            $numeroDeEnvio = $guiaData['response']['bultos'][0]['numeroDeEnvio'];
+                            unlink($helper->getDirectoryPath('media')."/andreani/".$numeroDeEnvio.'.png');
+                        }
                     }
                 }
             }
@@ -496,8 +511,14 @@ class MassImprimirGuiasAndreani extends \Magento\Sales\Controller\Adminhtml\Orde
                 $helper->generateHtml2Pdf($pdfName,$html,'D');
                 foreach($guiasContent AS $key => $guiaData)
                 {
-                    $object  = $guiaData->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
-                    unlink($helper->getDirectoryPath('media')."/andreani/".$object->NumeroAndreani.'.png');
+                    if($this->_andreaniHelper->getWebserviceMethod() == 'soap'){
+                        $object  = $guiaData->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
+                        unlink($helper->getDirectoryPath('media')."/andreani/".$object->NumeroAndreani.'.png');
+                    }
+                    else{
+                        $numeroDeEnvio = $guiaData['response']['bultos'][0]['numeroDeEnvio'];
+                        unlink($helper->getDirectoryPath('media')."/andreani/".$numeroDeEnvio.'.png');
+                    }
                 }
             }
 

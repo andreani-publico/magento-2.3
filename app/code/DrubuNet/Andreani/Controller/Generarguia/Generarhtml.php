@@ -13,7 +13,7 @@ use Magento\TestFramework\Inspection\Exception;
  *
  * @description
  *
- * @author Jhonattan Campo <jcampo@ids.net.ar>
+ * @author Drubu Team
  * @package DrubuNet\Andreani\Controller\Generarguia
  */
 class Generarhtml extends Action

@@ -15,7 +15,7 @@ use DrubuNet\Andreani\Model\CodigoPostalFactory;
  * @description Action que recibe un id de provincia y devuelve todas las localidades que tenga con sus respectivos
  *              codigos postales.
  *
- * @author Mauro Maximiliano Martinez <mmartinez@ids.net.ar>
+ * @author Drubu Team
  * @package DrubuNet\Andreani\Controller\Localidad
  */
 class Index extends Action

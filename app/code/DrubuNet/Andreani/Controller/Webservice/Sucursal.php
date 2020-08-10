@@ -16,7 +16,7 @@ use Magento\Checkout\Model\Session;
  * @description Recibe un codigo postal y devuelve las sucursales que tiene disponible
  *
  *
- * @author Mauro Maximiliano Martinez <mmartinez@ids.net.ar>
+ * @author Drubu Team
  * @package DrubuNet\Andreani\Controller\Webservice
  */
 class Sucursal extends Action

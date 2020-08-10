@@ -21,7 +21,7 @@ use Magento\Checkout\Model\Cart;
  * @description
  *
  *
- * @author Mauro Maximiliano Martinez <mmartinez@ids.net.ar>
+ * @author Drubu Team
  * @package DrubuNet\Andreani\Controller\Webservice
  */
 class Cotizar extends Action

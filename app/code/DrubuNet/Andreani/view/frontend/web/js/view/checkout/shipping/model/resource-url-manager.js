@@ -8,8 +8,8 @@ define(
     function(customer, quote, urlBuilder, utils) {
         "use strict";
         return {
-            getUrlForSucursalList: function(quote, limit) {
-                var params = {region: quote.shippingAddress().extensionAttributes.andreanisucursal_provincia, location: quote.shippingAddress().extensionAttributes.andreanisucursal_localidad};
+            getUrlForSucursalList: function(andreanisucursal_provincia,andreanisucursal_localidad, limit) {
+                var params = {region: andreanisucursal_provincia, location: andreanisucursal_localidad};
                 var urls = {
                     'default': '/module/get-sucursales-list/:region/:location'
                 };
@@ -22,8 +22,8 @@ define(
                 };
                 return this.getUrl(urls, params);
             },
-            getUrlForLocalidadList: function(quote, limit) {
-                var params = {region: quote.shippingAddress().extensionAttributes.andreanisucursal_provincia};
+            getUrlForLocalidadList: function(andreanisucursal_provincia, limit) {
+                var params = {region: andreanisucursal_provincia};
                 var urls = {
                     'default': '/module/get-localidades-list/:region'
                 };

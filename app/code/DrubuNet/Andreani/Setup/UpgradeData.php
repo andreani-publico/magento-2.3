@@ -12,7 +12,7 @@ use Magento\Customer\Setup\CustomerSetupFactory;
  * Class UpgradeData
  *
  * @description Actualizador de datos para las tablas
- * @author Mauro Maximiliano Martinez <mmartinez@ids.net.ar>
+ * @author Drubu Team
  * @package DrubuNet\Andreani\Setup
  */
 class UpgradeData implements UpgradeDataInterface

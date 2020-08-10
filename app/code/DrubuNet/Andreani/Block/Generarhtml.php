@@ -65,7 +65,7 @@ class Generarhtml extends Template
             }
         }
 
-        $andreaniDatosGuia  = json_decode(unserialize($andreaniDatosGuia));
+        //$andreaniDatosGuia  = json_decode(unserialize($andreaniDatosGuia));
         return $guiasArray;
     }
 

@@ -49,9 +49,8 @@ class Shipmentguia extends Template
         $helper             = $this->_andreaniHelper;
         $shipmentOrder      = $helper->loadByIncrementId($incrementId);
         $andreaniDatosGuia  = $shipmentOrder->getAndreaniDatosGuia();
-        $guiaContent        = json_decode(unserialize($andreaniDatosGuia));
         
-        return $guiaContent;
+        return $this->_andreaniHelper->getWebserviceMethod() == 'soap' ? json_decode(unserialize($andreaniDatosGuia)) : json_decode($andreaniDatosGuia,true);
     }
 
     /**

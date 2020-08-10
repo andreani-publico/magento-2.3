@@ -9,7 +9,7 @@ use Magento\Framework\View\Element\Template;
  *
  * @description
  *
- * @author Mauro Maximiliano Martinez <mmartinez@ids.net.ar>
+ * @author Drubu Team
  * @package DrubuNet\Andreani\Block\Catalog\Product\View\CostoEnvio
  */
 class CostoEnvio extends Template

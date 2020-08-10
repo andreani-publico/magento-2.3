@@ -133,13 +133,21 @@ class Data extends AbstractHelper
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
     }
 
+    public function getConfig($config_path)
+    {
+        return $this->_scopeConfig->getValue(
+            $config_path,
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+        );
+    }
+    
     /**
      * @description devuelve el usuario, que se configuró por admin.
      * @return mixed
      */
     public function getUsuario()
     {
-        return $this->_scopeConfig->getValue('shipping/andreani_configuracion/usuario');
+        return $this->getConfig('shipping/andreani_configuracion/usuario');
     }
 
     /**
@@ -148,7 +156,7 @@ class Data extends AbstractHelper
      */
     public function getNroCliente()
     {
-        return $this->_scopeConfig->getValue('shipping/andreani_configuracion/numero_cliente');
+        return $this->getConfig('shipping/andreani_configuracion/numero_cliente');
     }
 
     /**
@@ -157,7 +165,7 @@ class Data extends AbstractHelper
      */
     public function getPass()
     {
-        return $this->_scopeConfig->getValue('shipping/andreani_configuracion/password');
+        return $this->getConfig('shipping/andreani_configuracion/password');
     }
 
     /**
@@ -166,7 +174,7 @@ class Data extends AbstractHelper
      */
     public function getMetodo()
     {
-        return $this->_scopeConfig->getValue('shipping/andreani_configuracion/metodo');
+        return $this->getConfig('shipping/andreani_configuracion/metodo');
     }
 
     /**
@@ -175,7 +183,7 @@ class Data extends AbstractHelper
      */
     public function getModo()
     {
-        return $this->_scopeConfig->getValue('shipping/andreani_configuracion/modo');
+        return $this->getConfig('shipping/andreani_configuracion/modo');
     }
 
     /**
@@ -183,7 +191,7 @@ class Data extends AbstractHelper
      */
     public function getDebugHabilitado()
     {
-        return $this->_scopeConfig->getValue('shipping/andreani_configuracion/log_generacion_guias');
+        return $this->getConfig('shipping/andreani_configuracion/log_generacion_guias');
     }
 
     /**
@@ -192,7 +200,7 @@ class Data extends AbstractHelper
      */
     public function getCache()
     {
-        return $this->_scopeConfig->getValue('shipping/andreani_configuracion/cache');
+        return $this->getConfig('shipping/andreani_configuracion/cache');
     }
 
     /**
@@ -203,7 +211,7 @@ class Data extends AbstractHelper
     {
 //        $storeUrl           = $this->_storeManagerInterface->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
         $storeUrl           = $this->getDirectoryPath('media');
-        $logoEmpresa        = $this->_scopeConfig->getValue('shipping/andreani_configuracion/upload_image');
+        $logoEmpresa        = $this->getConfig('shipping/andreani_configuracion/upload_image');
         if($logoEmpresa!='')
         {
             $logoEmpresaPath    = $storeUrl.'/andreani/logo_empresa/'.$logoEmpresa;
@@ -265,7 +273,7 @@ class Data extends AbstractHelper
      */
     public function getUnidadMedida()
     {
-        return $this->_scopeConfig->getValue('shipping/andreani_configuracion/unidad_medida');
+        return $this->getConfig('shipping/andreani_configuracion/unidad_medida');
     }
 
     /**
@@ -274,7 +282,7 @@ class Data extends AbstractHelper
      */
     public function getPesoMaximo()
     {
-        return $this->_scopeConfig->getValue('shipping/andreani_configuracion/peso_maximo');
+        return $this->getConfig('shipping/andreani_configuracion/peso_maximo');
     }
 
     /**
@@ -283,7 +291,7 @@ class Data extends AbstractHelper
      */
     public function getTipoCotizacion()
     {
-        return $this->_scopeConfig->getValue('shipping/andreani_configuracion/tipo_cotizacion');
+        return $this->getConfig('shipping/andreani_configuracion/tipo_cotizacion');
     }
 
     /**
@@ -293,7 +301,7 @@ class Data extends AbstractHelper
      */
     public function getSucursalContrato()
     {
-        return $this->_scopeConfig->getValue('carriers/andreanisucursal/contrato');
+        return $this->getConfig('carriers/andreanisucursal/contrato');
     }
 
     /**
@@ -303,7 +311,7 @@ class Data extends AbstractHelper
      */
     public function getUrgenteContrato()
     {
-        return $this->_scopeConfig->getValue('carriers/andreaniurgente/contrato');
+        return $this->getConfig('carriers/andreaniurgente/contrato');
     }
 
     /**
@@ -313,7 +321,28 @@ class Data extends AbstractHelper
      */
     public function getEstandarContrato()
     {
-        return $this->_scopeConfig->getValue('carriers/andreaniestandar/contrato');
+        return $this->getConfig('carriers/andreaniestandar/contrato');
+    }
+
+    public function getContratoPorEnvio($carrier){
+        $carrierCode = explode('_', $carrier)[0];
+        $contrato = "";
+        switch($carrierCode)
+        {
+            case 'andreaniestandar' :
+                $contrato = $this->getEstandarContrato();
+                break;
+            case 'andreaniurgente' :
+                $contrato = $this->getUrgenteContrato();
+                break;
+            case 'andreanisucursal' :
+                $contrato = $this->getSucursalContrato();
+                break;
+            default:
+                $contrato = '';
+                break;
+        }
+        return $contrato;
     }
 
     /**
@@ -322,7 +351,7 @@ class Data extends AbstractHelper
      */
     public function getGeneracionGuiasConfig()
     {
-        return $this->_scopeConfig->getValue('shipping/andreani_configuracion/generacion_guia');
+        return $this->getConfig('shipping/andreani_configuracion/generacion_guia');
     }
 
     /**
@@ -331,7 +360,68 @@ class Data extends AbstractHelper
      */
     public function getAlmacenamientoGuiasConfig()
     {
-        return $this->_scopeConfig->getValue('shipping/andreani_configuracion/almacenamiento_guias');
+        return $this->getConfig('shipping/andreani_configuracion/almacenamiento_guias');
+    }
+
+    public function getCalleOrigenEnvio(){
+        return $this->getConfig('shipping/andreani_configuracion/andreani_datos_origen/calle');
+    }
+
+    public function getAlturaOrigenEnvio(){
+        return $this->getConfig('shipping/andreani_configuracion/andreani_datos_origen/numero');
+    }
+
+    public function getLocalidadOrigenEnvio(){
+        return $this->getConfig('shipping/andreani_configuracion/andreani_datos_origen/localidad');
+    }
+
+    public function getCodigoPostalOrigenEnvio(){
+        return $this->getConfig('shipping/andreani_configuracion/andreani_datos_origen/codigoPostal');
+    }
+
+    public function getRegionOrigenEnvio(){
+        return $this->getConfig('shipping/andreani_configuracion/andreani_datos_origen/region');
+    }
+
+    public function getPaisOrigenEnvio(){
+        $pais = $this->getConfig('shipping/andreani_configuracion/andreani_datos_origen/pais');
+        return $pais ? $pais : 'Argentina';
+    }
+
+    public function getPisoOrigenEnvio(){
+        return $this->getConfig('shipping/andreani_configuracion/andreani_datos_origen/piso');
+    }
+
+    public function getDepartamentoOrigenEnvio(){
+        return $this->getConfig('shipping/andreani_configuracion/andreani_datos_origen/departamento');
+    }
+
+    public function getEntreCallesOrigenEnvio(){
+        return $this->getConfig('shipping/andreani_configuracion/andreani_datos_origen/entreCalle');
+    }
+
+    public function getNombreCompletoRemitente(){
+        return $this->getConfig('shipping/andreani_configuracion/andreani_datos_remitente/nombreCompleto');
+    }
+
+    public function getEmailRemitente(){
+        return $this->getConfig('shipping/andreani_configuracion/andreani_datos_remitente/eMail');
+    }
+
+    public function getDocumentoTipoRemitente(){
+        return $this->getConfig('shipping/andreani_configuracion/andreani_datos_remitente/documentoTipo');
+    }
+
+    public function getDocumentoNumeroRemitente(){
+        return $this->getConfig('shipping/andreani_configuracion/andreani_datos_remitente/documentoNumero');
+    }
+
+    public function getTelefonoTipoRemitente(){
+        return $this->getConfig('shipping/andreani_configuracion/andreani_datos_remitente/telefonoTipo');
+    }
+
+    public function getTelefonoNumeroRemitente(){
+        return $this->getConfig('shipping/andreani_configuracion/andreani_datos_remitente/telefonoNumero');
     }
 
     /**
@@ -376,20 +466,20 @@ class Data extends AbstractHelper
         $transEmails = [];
 
         $transEmails['contact_general'] = [
-            'name'=> $this->_scopeConfig->getValue('trans_email/ident_general/name'),
-            'email'=> $this->_scopeConfig->getValue('trans_email/ident_general/email')
+            'name'=> $this->getConfig('trans_email/ident_general/name'),
+            'email'=> $this->getConfig('trans_email/ident_general/email')
 
         ];
 
         $transEmails['representante_ventas'] = [
-            'name'=> $this->_scopeConfig->getValue('trans_email/ident_sales/name'),
-            'email'=> $this->_scopeConfig->getValue('trans_email/ident_sales/email')
+            'name'=> $this->getConfig('trans_email/ident_sales/name'),
+            'email'=> $this->getConfig('trans_email/ident_sales/email')
 
         ];
 
         $transEmails['atencion_cliente'] = [
-            'name'=> $this->_scopeConfig->getValue('trans_email/ident_support/name'),
-            'email'=> $this->_scopeConfig->getValue('trans_email/ident_support/email')
+            'name'=> $this->getConfig('trans_email/ident_support/name'),
+            'email'=> $this->getConfig('trans_email/ident_support/email')
 
         ];
 
@@ -397,7 +487,7 @@ class Data extends AbstractHelper
         {
             if($type=='andreani')
             {
-                $andreaniTransEmail = $this->_scopeConfig->getValue('shipping/andreani_configuracion/andreani_trans_emails');
+                $andreaniTransEmail = $this->getConfig('shipping/andreani_configuracion/andreani_trans_emails');
                 $transEmails = $transEmails[$andreaniTransEmail];
             }
             else
@@ -429,25 +519,25 @@ class Data extends AbstractHelper
         switch($method)
         {
             case self::COTIZACION:
-                $url = $this->_scopeConfig->getValue($configField.$method);
+                $url = $this->getConfig($configField.$method);
                 break;
             case self::TRAZABILIDAD:
-                $url = $this->_scopeConfig->getValue($configField.$method);
+                $url = $this->getConfig($configField.$method);
                 break;
             case self::IMPRESIONCONSTANCIA:
-                $url = $this->_scopeConfig->getValue($configField.$method);
+                $url = $this->getConfig($configField.$method);
                 break;
             case self::OBTESTADODIST:
-                $url = $this->_scopeConfig->getValue($configField.$method);
+                $url = $this->getConfig($configField.$method);
                 break;
             case self::SUCURSALES:
-                $url = $this->_scopeConfig->getValue($configField.$method);
+                $url = $this->getConfig($configField.$method);
                 break;
             case self::CONFIRCOMPRA:
-                $url = $this->_scopeConfig->getValue($configField.$method);
+                $url = $this->getConfig($configField.$method);
                 break;
             case self::GENENVIOENTREGARETIROIMPRESION:
-                $url = $this->_scopeConfig->getValue($configField.$method);
+                $url = $this->getConfig($configField.$method);
                 break;
             default:
                 $url = '';
@@ -592,7 +682,7 @@ class Data extends AbstractHelper
 
         }catch (Html2PdfException $e) {
             $this->log($e,'generateHtml2Pdf_error.log');
-            return false;
+            return $e->getMessage();
         }
     }
 
@@ -616,28 +706,28 @@ class Data extends AbstractHelper
         switch($method)
         {
             case self::COTIZACION:
-                $soapVersion = $this->_scopeConfig->getValue($configField.$method.'_soap_version');
+                $soapVersion = $this->getConfig($configField.$method.'_soap_version');
                 break;
             case self::TRAZABILIDAD:
-                $soapVersion = $this->_scopeConfig->getValue($configField.$method.'_soap_version');
+                $soapVersion = $this->getConfig($configField.$method.'_soap_version');
                 break;
             case self::IMPRESIONCONSTANCIA:
-                $soapVersion = $this->_scopeConfig->getValue($configField.$method.'_soap_version');
+                $soapVersion = $this->getConfig($configField.$method.'_soap_version');
                 break;
             case self::OBTESTADODIST:
-                $soapVersion = $this->_scopeConfig->getValue($configField.$method.'_soap_version');
+                $soapVersion = $this->getConfig($configField.$method.'_soap_version');
                 break;
             case self::SUCURSALES:
-                $soapVersion = $this->_scopeConfig->getValue($configField.$method.'_soap_version');
+                $soapVersion = $this->getConfig($configField.$method.'_soap_version');
                 break;
             case self::CONFIRCOMPRA:
-                $soapVersion = $this->_scopeConfig->getValue($configField.$method.'_soap_version');
+                $soapVersion = $this->getConfig($configField.$method.'_soap_version');
                 break;
             case self::GENENVIOENTREGARETIROIMPRESION:
-                $soapVersion = $this->_scopeConfig->getValue($configField.$method.'_soap_version');
+                $soapVersion = $this->getConfig($configField.$method.'_soap_version');
                 break;
             case self::ANULARENVIO:
-                $soapVersion = $this->_scopeConfig->getValue($configField.$method.'_soap_version');
+                $soapVersion = $this->getConfig($configField.$method.'_soap_version');
                 break;
             default:
                 $soapVersion = '';
@@ -685,87 +775,67 @@ class Data extends AbstractHelper
      */
     public function getTrackingUrl($trackingNumber)
     {
-        return $this->_scopeConfig->getValue('shipping/andreani_configuracion/tracking_url').DIRECTORY_SEPARATOR.$trackingNumber;
+        return $this->getConfig('shipping/andreani_configuracion/tracking_url').DIRECTORY_SEPARATOR.$trackingNumber;
     }
 
     public function isActiveCalculadorPdp()
     {
-        return $this->_scopeConfig->getValue('shipping/andreani_configuracion/calculadorpdp');
+        return $this->getConfig('shipping/andreani_configuracion/calculadorpdp');
     }
 
 
     public function isActiveAndreaniEstandar()
     {
-        return $this->_scopeConfig->getValue('carriers/andreaniestandar/active');
+        return $this->getConfig('carriers/andreaniestandar/active');
     }
 
     public function isActiveAndreaniUrgente()
     {
-        return $this->_scopeConfig->getValue('carriers/andreaniurgente/active');
+        return $this->getConfig('carriers/andreaniurgente/active');
     }
 
     public function isActiveAndreaniSucursal()
     {
-        return $this->_scopeConfig->getValue('carriers/andreanisucursal/active');
+        return $this->getConfig('carriers/andreanisucursal/active');
     }
 
     public function getPrecioFijo()
     {
-        return $this->_scopeConfig->getValue('shipping/andreani_configuracion/precio_fijo');
+        return $this->getConfig('shipping/andreani_configuracion/precio_fijo');
     }
 
     public function getVolumenFijo()
     {
-        return $this->_scopeConfig->getValue('shipping/andreani_configuracion/volumen_fijo');
-    }
-
-    /**
-     * @description Devuelve si se encuentra habilitada la generacion de los pdf de las guias en formato para impresora de etiquetas (Zebra ©)
-     *
-     * @return int
-     */
-    public function isZebraPrinterEnabled()
-    {
-        return $this->_scopeConfig->getValue('shipping/andreani_configuracion/enable_zebraprinter');
-    }
-
-    public function getWidthZebraPrinter()
-    {
-        return $this->_scopeConfig->getValue('shipping/andreani_configuracion/size_width_zebraprinter');
-    }
-
-    public function getHeightZebraPrinter()
-    {
-        return $this->_scopeConfig->getValue('shipping/andreani_configuracion/size_height_zebraprinter');
+        return $this->getConfig('shipping/andreani_configuracion/volumen_fijo');
     }
 
     public function getGuiaTemplate()
     {
-        if($this->isZebraPrinterEnabled())
+        if($this->getWebserviceMethod() == 'soap')
         {
-            return 'DrubuNet_Andreani::zebraprinter/guia.phtml';
+            return 'DrubuNet_Andreani::guia.phtml';
         }
         else
         {
-            return 'DrubuNet_Andreani::guia.phtml';
+            return 'DrubuNet_Andreani::guiarest.phtml';
         }
     }
 
     public function getGuiaMasivaTemplate()
     {
-        if($this->isZebraPrinterEnabled())
+        if($this->getWebserviceMethod() == 'soap')
         {
-            return 'DrubuNet_Andreani::zebraprinter/guiamasiva.phtml';
+            return 'DrubuNet_Andreani::guiamasiva.phtml';
         }
         else
         {
-            return 'DrubuNet_Andreani::guiamasiva.phtml';
+            return 'DrubuNet_Andreani::guiamasivarest.phtml';
         }
 
     }
 
     public function getWebserviceMethod(){
-        return 'soap';
+        return $this->getConfig('shipping/andreani_configuracion/tipo_ws');
     }
 
     public function getOrderByIncrementId($incrementId){

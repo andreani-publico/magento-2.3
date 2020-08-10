@@ -250,11 +250,11 @@ class AndreaniSucursal extends AbstractCarrierOnline implements CarrierInterface
         $nombreSucursal = $this->_checkoutSession->getNombreAndreaniSucursal();
         if(!empty($nombreSucursal))
         {
-            $method->setMethodTitle('Retiro en Sucursal Andreani'); //$nombreSucursal
+            $method->setMethodTitle($nombreSucursal); //$nombreSucursal
         }
         else
         {
-            $method->setMethodTitle("Retira tu compra en la sucursal Andreani mas cercana."/*$this->getConfigData('description')*/);
+            $method->setMethodTitle($this->getConfigData('description'));
         }
 
         $valorCotizacion = $this->_checkoutSession->getCotizacionAndreaniSucursal();

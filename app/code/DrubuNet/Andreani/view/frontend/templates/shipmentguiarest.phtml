@@ -9,29 +9,29 @@
 $incrementId            = $block->getRequest()->getParam('increment_id');
 $blockData          = $block->getAndreaniDataGuia($incrementId);
 
-$andreaniDatosGuia  = $blockData->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
-$lastRequest        = $blockData->lastrequest;
+$andreaniDatosGuia  = $blockData;
+$lastRequest        = $blockData['request'];
 $titleShipment      = '';
 $shippingMethod = $block->getShippingMethod($incrementId);
 
 switch ($shippingMethod)
 {
     case 'andreaniurgente_urgente'  :
-        $clientCredentials  = $block->getClientCredentials($andreaniDatosGuia->Categoria);
+        $clientCredentials  = $block->getClientCredentials('urgente');
         $contrato           = $clientCredentials['contrato'];
         $cliente            = $clientCredentials['cliente'];
         $titleShipment      = 'DOMICILIO URGENTE';
         $titleShipment2     = 'ANDREANI URGENTE';
         break;
     case 'andreaniestandar_estandar' :
-        $clientCredentials  = $block->getClientCredentials($andreaniDatosGuia->Categoria);
+        $clientCredentials  = $block->getClientCredentials('estandar');
         $contrato           = $clientCredentials['contrato'];
         $cliente            = $clientCredentials['cliente'];
         $titleShipment      = 'DOMICILIO ESTANDAR';
         $titleShipment2     = 'ANDREANI ESTANDAR';
         break;
     default         :
-        $clientCredentials  = $block->getClientCredentials($andreaniDatosGuia->Categoria);
+        $clientCredentials  = $block->getClientCredentials('sucursal');
         $contrato           = $clientCredentials['contrato'];
         $cliente            = $clientCredentials['cliente'];
         $titleShipment      = 'ENTREGA EN SUCURSAL';
@@ -39,13 +39,13 @@ switch ($shippingMethod)
         break;
 }
 
-$codigoBarras       = $block->getCodigoBarras($andreaniDatosGuia->NumeroAndreani);
+$codigoBarras       = $block->getCodigoBarras($andreaniDatosGuia['response']['bultos'][0]['numeroDeEnvio']);
 ?>
 <?php $logoCliente = ''; ?>
 <?php if($block->getlogoEmpresaPath()!=''): ?>
     <?php $logoCliente =  $block->getlogoEmpresaPath() ?>
 <?php endif; ?>
-<?php if($andreaniDatosGuia->CodigoDeResultado): ?>
+<?php if(true/*$andreaniDatosGuia->CodigoDeResultado*/): ?>
     <style type="text/css">
 
         page {
@@ -199,21 +199,20 @@ $codigoBarras       = $block->getCodigoBarras($andreaniDatosGuia->NumeroAndreani
                 <table border="0" cellspacing="0" cellpadding="0" class="info">
                     <tr>
                         <td align="left" valign="top" style="width:50mm;">
-                            ID: <?= isset($lastRequest->increment_id) ? $lastRequest->increment_id : '' ?>
-                            <br />Destinatario:<?= " {$lastRequest->nombre} {$lastRequest->apellido}"?>
-                            <br />Calle:<?= " {$lastRequest->calle} {$lastRequest->numero}"?>
-                            <br />Piso:<?= " {$lastRequest->piso}"?>
-                            <br />Depto:<?= " {$lastRequest->departamento}"?>
-                            <br />CP:<?= " {$lastRequest->codigopostal}"?>
-                            <br />Teléfono: <?= " {$lastRequest->telefonofijo}"?>
-
+                            ID: <?= isset($lastRequest['bultos'][0]['referencias'][0]['contenido']) ? $lastRequest['bultos'][0]['referencias'][0]['contenido'] : '' ?>
+                            <br />Destinatario:<?= " {$lastRequest['destinatario'][0]['nombreCompleto']}"?>
+                            <br />Calle:<?= " {$lastRequest['destino']['postal']['calle']} {$lastRequest['destino']['postal']['numero']}"?>
+                            <br />Piso:<?= " {$lastRequest['destino']['postal']['componentesDeDireccion'][0]['contenido']}"?>
+                            <br />Depto:<?= " {$lastRequest['destino']['postal']['componentesDeDireccion'][1]['contenido']}"?>
+                            <br />CP:<?= " {$lastRequest['destino']['postal']['codigoPostal']}"?>
+                            <br />Teléfono: <?= " {$lastRequest['destinatario'][0]['telefonos'][0]['numero']}"?>
                         </td>
                         <td align="left" valign="top" style="width:50mm;">
 
-                            Provincia:<?= " {$lastRequest->provincia}"?>
-                            <br />Localidad:<?= " {$lastRequest->localidad}"?>
-                            <br />Suc. Distribución:<?= " {$andreaniDatosGuia->SucursalDeDistribucion}"?>
-                            <br />Suc Rendición:<?= " {$andreaniDatosGuia->SucursalDeRendicion}"?>
+                            Provincia:<?= " {$lastRequest['destino']['postal']['region']}"?>
+                            <br />Localidad:<?= " {$lastRequest['destino']['postal']['localidad']}"?>
+                            <br />Suc. Distribución:<?= " {$andreaniDatosGuia['response']['sucursalDeDistribucion']['id']} - {$andreaniDatosGuia['response']['sucursalDeDistribucion']['nomenclatura']}"?>
+                            <br />Suc Rendición:<?= " {$andreaniDatosGuia['response']['sucursalDeRendicion']['descripcion']}"?>
                             <br />F.V.
                             <br />F.R.
                         </td>
@@ -222,15 +221,15 @@ $codigoBarras       = $block->getCodigoBarras($andreaniDatosGuia->NumeroAndreani
                             <br />Razón Social:
                             <br />Servicio:<?= " {$contrato}"?><br />
                             <div class="codigo-barras">
-                                <img src="<?= $codigoBarras ?>" width="120" height="48" alt="<?= $andreaniDatosGuia->NumeroAndreani ?>"/><br />
-                                <?= "{$andreaniDatosGuia->NumeroAndreani}" ?>
+                                <img src="<?= $codigoBarras ?>" width="120" height="48" alt="<?= $andreaniDatosGuia['response']['bultos'][0]['numeroDeEnvio'] ?>"/><br />
+                                <?= "{$andreaniDatosGuia['response']['bultos'][0]['numeroDeEnvio']}" ?>
                             </div>
-                            Correo Andreani<?= " {$andreaniDatosGuia->NumeroDePermisionaria}" ?>
+                            Correo Andreani<?= " {$andreaniDatosGuia['response']['numeroDePermisionaria']}" ?>
                         </td>
                     </tr>
                     <tr>
                         <td colspan="2" align="left" valign="top" class="nada">
-                            Observaciones:  <?= " {$lastRequest->detalledeproductosaentregar}"?>
+                            Observaciones:  <?= " {$lastRequest['productoAEntregar']}"?>
                         </td>
                     </tr>
                 </table>
@@ -255,24 +254,24 @@ $codigoBarras       = $block->getCodigoBarras($andreaniDatosGuia->NumeroAndreani
                 <table border="0" cellspacing="0" cellpadding="0" class="info">
                     <tr>
                         <td align="left" valign="top" style="width:50mm;">
-                            ID: <?= isset($lastRequest->increment_id) ? $lastRequest->increment_id : '' ?>
-                            <br />Destinatario:<?= " {$lastRequest->nombre} {$lastRequest->apellido}"?>
-                            <br />Calle:<?= " {$lastRequest->calle} {$lastRequest->numero}"?>
-                            <br />Piso: <?= " {$lastRequest->piso}"?>
-                            <br />Depto: <?= " {$lastRequest->departamento}"?>
-                            <br /">CP:<?= " {$lastRequest->codigopostal}"?>
-                            <br />Localidad:<?= " {$lastRequest->localidad}"?>
-                            <br />Provincia:<?= " {$lastRequest->provincia}"?>
-                            <br />Teléfono: <?= " {$lastRequest->telefonofijo}"?>
+                            ID: <?= isset($lastRequest['bultos'][0]['referencias'][0]['contenido']) ? $lastRequest['bultos'][0]['referencias'][0]['contenido'] : '' ?>
+                            <br />Destinatario:<?= " {$lastRequest['destinatario'][0]['nombreCompleto']}"?>
+                            <br />Calle:<?= " {$lastRequest['destino']['postal']['calle']} {$lastRequest['destino']['postal']['numero']}"?>
+                            <br />Piso: <?= " {$lastRequest['destino']['postal']['componentesDeDireccion'][0]['contenido']}"?>
+                            <br />Depto: <?= " {$lastRequest['destino']['postal']['componentesDeDireccion'][1]['contenido']}"?>
+                            <br /">CP:<?= " {$lastRequest['destino']['postal']['codigoPostal']}"?>
+                            <br />Localidad:<?= " {$lastRequest['destino']['postal']['localidad']}"?>
+                            <br />Provincia:<?= " {$lastRequest['destino']['postal']['region']}"?>
+                            <br />Teléfono: <?= " {$lastRequest['destinatario'][0]['telefonos'][0]['numero']}"?>
                         </td>
                         <td align="left" valign="top" style="width:50mm;">
-                            DNI:<?= " {$lastRequest->numerodedocumento}"?>
-                            <br />Peso:<?=  " {$lastRequest->peso}"?>
+                            DNI:<?= " {$lastRequest['destinatario'][0]['documentoNumero']}"?>
+                            <br />Peso:<?=  " {$lastRequest['bultos'][0]['kilos']}"?>
                             <br />Altura:
                             <br />Largo:
                             <br />Ancho:
-                            <br />Suc. Distribución:<?= " {$andreaniDatosGuia->SucursalDeDistribucion}"?>
-                            <br />Suc. Rendición:<?= " {$andreaniDatosGuia->SucursalDeRendicion}"?>
+                            <br />Suc. Distribución:<?= " {$andreaniDatosGuia['response']['sucursalDeDistribucion']['id']} - {$andreaniDatosGuia['response']['sucursalDeDistribucion']['nomenclatura']}"?>
+                            <br />Suc. Rendición:<?= " {$andreaniDatosGuia['response']['sucursalDeRendicion']['descripcion']}"?>
                         </td>
                         <td align="left" valign="top" style="width:66mm;">
                             Cliente:<?= " {$cliente}"?>
@@ -280,10 +279,10 @@ $codigoBarras       = $block->getCodigoBarras($andreaniDatosGuia->NumeroAndreani
                             <br />Servicio:<?= " {$contrato}"?>
                             <br />
                             <div class="codigo-barras">
-                                <img src="<?= $codigoBarras ?>" width="120" height="48" alt="<?= $andreaniDatosGuia->NumeroAndreani ?>" /><br />
-                                <?= "{$andreaniDatosGuia->NumeroAndreani}" ?>
+                                <img src="<?= $codigoBarras ?>" width="120" height="48" alt="<?= $andreaniDatosGuia['response']['bultos'][0]['numeroDeEnvio'] ?>" /><br />
+                                <?= "{$andreaniDatosGuia['response']['bultos'][0]['numeroDeEnvio']}" ?>
                             </div>
-                            Correo Andreani<?= " {$andreaniDatosGuia->NumeroDePermisionaria}" ?>
+                            Correo Andreani<?= " {$andreaniDatosGuia['response']['numeroDePermisionaria']}" ?>
                         </td>
                     </tr>
                 </table>
@@ -405,7 +404,7 @@ $codigoBarras       = $block->getCodigoBarras($andreaniDatosGuia->NumeroAndreani
                     </tr>
                 </table>
             </div>
-            <p>Correo Andreani<?=  " {$andreaniDatosGuia->NumeroDePermisionaria}" ?></p>
+            <p>Correo Andreani<?=  " {$andreaniDatosGuia['response']['numeroDePermisionaria']}" ?></p>
         </div>
 
         <div class="main-1" style="border-top: 0.1mm dashed #aaa;">
@@ -419,25 +418,25 @@ $codigoBarras       = $block->getCodigoBarras($andreaniDatosGuia->NumeroAndreani
                         <td align="left" valign="top" style="width:124mm; padding:0;">
                             <table border="0" cellspacing="0" cellpadding="0" class="info">
                                 <tr>
-                                    <td>ID: <?= isset($lastRequest->increment_id) ? $lastRequest->increment_id : '' ?></td>
+                                    <td>ID: <?= isset($lastRequest['bultos'][0]['referencias'][0]['contenido']) ? $lastRequest['bultos'][0]['referencias'][0]['contenido'] : '' ?></td>
                                     <td>Cliente:<?= " {$cliente}"?></td>
                                 </tr>
                                 <tr>
-                                    <td>Destinatario:<?= " {$lastRequest->nombre} {$lastRequest->apellido}"?></td>
+                                    <td>Destinatario:<?= " {$lastRequest['destinatario'][0]['nombreCompleto']}"?></td>
                                     <td>Razón Social:</td>
                                 </tr>
                                 <tr>
-                                    <td>Teléfono:<?= " {$lastRequest->telefonofijo}" ?></td>
+                                    <td>Teléfono:<?= " {$lastRequest['destinatario'][0]['telefonos'][0]['numero']}" ?></td>
                                     <td>Servicio:<?= " {$contrato}" ?></td>
                                 </tr>
                             </table>
                         </td>
                         <td align="left" valign="top" style="width:66.3mm;">
                             <div class="codigo-barras" style="padding-top:1mm;">
-                                <img src="<?= $codigoBarras ?>" width="120" height="48" alt="<?= $andreaniDatosGuia->NumeroAndreani ?>" /><br>
-                                <?= $andreaniDatosGuia->NumeroAndreani ?>
+                                <img src="<?= $codigoBarras ?>" width="120" height="48" alt="<?= $andreaniDatosGuia['response']['bultos'][0]['numeroDeEnvio'] ?>" /><br>
+                                <?= $andreaniDatosGuia['response']['bultos'][0]['numeroDeEnvio'] ?>
                             </div>
-                            Correo Andreani<?=" {$andreaniDatosGuia->NumeroDePermisionaria}" ?>
+                            Correo Andreani<?=" {$andreaniDatosGuia['response']['numeroDePermisionaria']}" ?>
                         </td>
                     </tr>
                 </table>
@@ -452,9 +451,7 @@ $codigoBarras       = $block->getCodigoBarras($andreaniDatosGuia->NumeroAndreani
         </div>
     </page>
 <?php else: ?>
-    <page>
-        <div>
-            Código error <?=  "{$andreaniDatosGuia->CodigoDeResultado} . {$andreaniDatosGuia->DescripcionDeResultado}" ?>
-        </div>
-    </page>
+    <div>
+        Ocurrió un error, comuníquese con Andreani
+    </div>
 <?php endif; ?>

@@ -8,7 +8,7 @@ define([
     'mage/translate',
 ], function ($, ko, Component, quote, shippingService, sucursalService, t) {
     'use strict';
-
+    let andreanisucursal_provincia, andreanisucursal_localidad, andreanisucursal_sucursal;
     return Component.extend({
         defaults: {
             template: 'DrubuNet_Andreani/checkout/shipping/form'
@@ -57,24 +57,15 @@ define([
                 }
             }, this);
             this.selectedProvincia.subscribe(function(provincia) {
-                if (quote.shippingAddress().extensionAttributes == undefined) {
-                    quote.shippingAddress().extensionAttributes = {};
-                }
-                quote.shippingAddress().extensionAttributes.andreanisucursal_provincia = provincia;
+                andreanisucursal_provincia = provincia;
             });
 
             this.selectedLocalidad.subscribe(function(localidad) {
-                if (quote.shippingAddress().extensionAttributes == undefined) {
-                    quote.shippingAddress().extensionAttributes = {};
-                }
-                quote.shippingAddress().extensionAttributes.andreanisucursal_localidad = localidad;
+                andreanisucursal_localidad = localidad;
             });
 
             this.selectedSucursal.subscribe(function(sucursal) {
-                if (quote.shippingAddress().extensionAttributes == undefined) {
-                    quote.shippingAddress().extensionAttributes = {};
-                }
-                quote.shippingAddress().extensionAttributes.andreanisucursal_sucursal = sucursal;
+                andreanisucursal_sucursal = sucursal;
             });
 
 
@@ -94,8 +85,8 @@ define([
         },
 
         reloadSucursales: function() {
-            if(quote.shippingAddress().extensionAttributes.andreanisucursal_provincia != undefined && quote.shippingAddress().extensionAttributes.andreanisucursal_localidad != undefined) {
-                sucursalService.getSucursalList(quote.shippingAddress(), this);
+            if(andreanisucursal_provincia != undefined && andreanisucursal_localidad != undefined) {
+                sucursalService.getSucursalList(quote.shippingAddress(), this, andreanisucursal_provincia, andreanisucursal_localidad);
                 var defaultSucursal = this.sucursales()[0];
                 if (defaultSucursal) {
                     this.selectedSucursal(defaultSucursal);
@@ -116,8 +107,8 @@ define([
         },
 
         reloadLocalidades: function() {
-            if(quote.shippingAddress().extensionAttributes.andreanisucursal_provincia != undefined) {
-                sucursalService.getLocalidadList(quote.shippingAddress(), this);
+            if(andreanisucursal_provincia != undefined) {
+                sucursalService.getLocalidadList(quote.shippingAddress(), this, andreanisucursal_provincia);
                 var defaultLocalidad = this.localidades()[0];
                 if (defaultLocalidad) {
                     this.selectedLocalidad(defaultLocalidad);
@@ -191,14 +182,14 @@ define([
             this.sucursales([]);
             this.selectedLocalidad(null);
             this.selectedSucursal(null);
-            quote.shippingAddress().extensionAttributes.andreanisucursal_localidad = undefined;
-            quote.shippingAddress().extensionAttributes.andreanisucursal_sucursal = undefined;
+            andreanisucursal_localidad = undefined;
+            andreanisucursal_sucursal = undefined;
             this.reloadLocalidades();
         },
         localidadChange: function(obj, event){
             this.sucursales([]); //borro las sucursales
             this.selectedSucursal(null);
-            quote.shippingAddress().extensionAttributes.andreanisucursal_sucursal = undefined
+            andreanisucursal_sucursal = undefined
             this.reloadSucursales();
             //boton siguiente desactivado
         },

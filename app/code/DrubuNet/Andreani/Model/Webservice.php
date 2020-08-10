@@ -16,7 +16,7 @@ class Webservice
 
     protected $helper;
     protected $httpClientFactory;
-    private $url = "https://api.andreani.com";
+    private $url;
     private $token;
 
     public function __construct(
@@ -26,10 +26,10 @@ class Webservice
     {
         $this->helper       = $helper;
         $this->httpClientFactory = $httpClientFactory;
+        $this->url = $this->helper->getModo() == $this::MODE_DEV ? 'https://api.qa.andreani.com' : 'https://api.andreani.com';
     }
 
     /**
-     * Funciona
      * @description Obtengo el token necesario para comunicarme con los servicios de Andreani
      * @return string
      */
@@ -47,7 +47,7 @@ class Webservice
      * Impongo la orden en el servicio
      */
     public function generarEnvio($params){
-        $url = $this->url . '/v1/ordenesDeEnvio';
+        $url = $this->url . '/v2/ordenes-de-envio';
         if(empty($this->token)){
             $this->login();
         }
@@ -58,11 +58,11 @@ class Webservice
 
     /**
      * @param $nroOrden
-     * @return string
      * @description Obtengo el detalle de un envio por número Andreani.
+     * @return string
      */
     public function getOrderCreated($nroOrden){
-        $url = $this->url . '/v1/ordenesDeEnvio/' . $nroOrden;
+        $url = $this->url . '/v2/ordenes-de-envio/' . $nroOrden;
         if(empty($this->token)){
             $this->login();
         }
@@ -72,6 +72,21 @@ class Webservice
     }
 
     /**
+     * @description Lista todas (o una) las sucursales de Andreani que son pausibles de admitir o retirar envíos
+     * @return array
+     */
+    public function getSucursales(){
+        $url = $this->url . '/v2/sucursales?canal=B2C&seHaceAtencionAlCliente=true';
+        if(empty($this->token)){
+            $this->login();
+        }
+        $encoded['code'] = "x-authorization-token";
+        $encoded['value'] = $this->token;
+        return json_decode($this->doRequest($url,\Zend_Http_Client::GET, $encoded)->getBody(),true);
+    }
+
+    /**
+     * No soportado en V2
      * @param $nroOrden
      * @return string
      * @description Devuelve todos los movimientos de un envío por número Andreani.
@@ -87,6 +102,7 @@ class Webservice
     }
 
     /**
+     * No soportado en V2
      * @param $nroOrden
      * @return string
      * @description Devuelve la información de un envío por Número Andreani.
@@ -102,7 +118,6 @@ class Webservice
     }
 
     /**
-     * Funciona
      * @param $params
      * @return string
      * @description Devuelve la tarifa de un envio a partir de parametros.
@@ -114,7 +129,7 @@ class Webservice
     }
 
     /**
-     * Funciona
+     * No soportado en V2
      * @description Listado de las provinicas reconocidas según ISO-3166-2:AR
      * @return array
      */
@@ -123,24 +138,7 @@ class Webservice
         if(empty($this->token)){
             $this->login();
         }
-        /*$encoded['code'] = "x-authorization-token";
-        $encoded['value'] = $this->token;*/
         $encoded = null;
-        return json_decode($this->doRequest($url,\Zend_Http_Client::GET, $encoded)->getBody(),true);
-    }
-
-    /**
-     * Funciona
-     * @description Lista todas (o una) las sucursales de Andreani que son pausibles de admitir o retirar envíos
-     * @return array
-     */
-    public function getSucursales(){
-        $url = $this->url . '/v1/sucursales';
-        if(empty($this->token)){
-            $this->login();
-        }
-        $encoded['code'] = "x-authorization-token";
-        $encoded['value'] = $this->token;
         return json_decode($this->doRequest($url,\Zend_Http_Client::GET, $encoded)->getBody(),true);
     }
 
@@ -158,13 +156,11 @@ class Webservice
                 $client->setParameterGet($params); //json
             }
             else if ($method === \Zend_Http_Client::POST){
-                $client->setParameterPost($params);
+                $client->setRawData($params);
             }
         }
 
         return $client->request();
-
-        //return $response->getBody();
     }
     private function doPost($url, $method, $header = null, $params = null){
         $client = $this->httpClientFactory->create();
@@ -173,10 +169,8 @@ class Webservice
         $client->setHeaders(\Zend_Http_Client::CONTENT_TYPE, 'application/json');
         $client->setHeaders('Accept','application/json');
         $client->setHeaders("x-authorization-token",$this->token);
-        $client->setParameterPost($params); //json
+        $client->setRawData($params); //json
 
         return $client->request();
-
-        //return $response->getBody();
     }
 }

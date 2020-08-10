@@ -16,7 +16,7 @@ use DrubuNet\Andreani\Helper\Data as AndreaniHelper;
  *
  * @description Recibe un codigo postal y devuelve las sucursales que tiene disponible
  *
- * @author Mauro Maximiliano Martinez <mmartinez@ids.net.ar>
+ * @author Drubu Team
  * @package DrubuNet\Andreani\Controller\Sucursal
  */
 class Index extends Action

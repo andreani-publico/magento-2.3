@@ -63,10 +63,17 @@ class Imprimir extends  \Magento\Backend\App\Action
 
                 $shipmentOrder      = $helper->loadByIncrementId($incrementId);
                 $andreaniDatosGuia  = $shipmentOrder->getAndreaniDatosGuia();
-                $guiaContent        = json_decode(unserialize($andreaniDatosGuia));
+                if($this->_andreaniHelper->getWebserviceMethod() == 'soap') {
+                    $guiaContent = json_decode(unserialize($andreaniDatosGuia));
 
-                $object             = $guiaContent->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
-                $helper->crearCodigoDeBarras($object->NumeroAndreani);
+                    $object = $guiaContent->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
+                    $helper->crearCodigoDeBarras($object->NumeroAndreani);
+                }
+                else{
+                    $guiaContent = json_decode($andreaniDatosGuia, true);
+                    $object = $guiaContent['response']['bultos'][0]['numeroDeEnvio'];
+                    $helper->crearCodigoDeBarras($object);
+                }
 
                 $objectManager  = \Magento\Framework\App\ObjectManager::getInstance();
                 $storeManager   = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
@@ -77,16 +84,30 @@ class Imprimir extends  \Magento\Backend\App\Action
                  * Crea el bloque dinámicamente y le pasa los parámetros por array para
                  * que renderice la guía en html.
                  */
-                $block = $this->_view
-                    ->getLayout()
-                    ->createBlock('DrubuNet\Andreani\Block\Shipmentguia',
-                        "shipmentguia",
-                        ['data' => [
-                            'increment_id' => $incrementId
-                        ]
-                        ])
-                    ->setData('area', 'frontend')
-                    ->setTemplate('DrubuNet_Andreani::shipmentguia.phtml');
+                if($this->_andreaniHelper->getWebserviceMethod() == 'soap'){
+                    $block = $this->_view
+                        ->getLayout()
+                        ->createBlock('DrubuNet\Andreani\Block\Shipmentguia',
+                            "shipmentguia",
+                            ['data' => [
+                                'increment_id' => $incrementId
+                            ]
+                            ])
+                        ->setData('area', 'frontend')
+                        ->setTemplate('DrubuNet_Andreani::shipmentguia.phtml');
+                }
+                else{
+                    $block = $this->_view
+                        ->getLayout()
+                        ->createBlock('DrubuNet\Andreani\Block\Shipmentguia',
+                            "shipmentguia",
+                            ['data' => [
+                                'increment_id' => $incrementId
+                            ]
+                            ])
+                        ->setData('area', 'frontend')
+                        ->setTemplate('DrubuNet_Andreani::shipmentguiarest.phtml');
+                }
 
                 $html = $block->toHtml();
 
@@ -95,15 +116,19 @@ class Imprimir extends  \Magento\Backend\App\Action
                  * que se encarga de generar la guía en HTML. El tercer parámetro
                  * fuerza la descarga (D) o fuerza el almacenamiento en el filesystem (F)
                  */
-                if($helper->generateHtml2Pdf($pdfName,$html,'D'))
+                $result = $helper->generateHtml2Pdf($pdfName,$html,'D');
+                if(is_bool($result) && $result)
                 {
                     $this->messageManager->addSuccess( __('La guía se generó correctamente.') );
-                    unlink($helper->getDirectoryPath('media')."/andreani/".$object->NumeroAndreani.'.png');
+                    ($this->_andreaniHelper->getWebserviceMethod() == 'soap') ? unlink($helper->getDirectoryPath('media')."/andreani/".$object->NumeroAndreani.'.png') : unlink($helper->getDirectoryPath('media')."/andreani/".$object.'.png');
+                }
+                else{
+                    $this->messageManager->addErrorMessage(__('Hubo un problema generando la guía. ' . $result));
                 }
 
-            }catch (Exception $e)
+            }catch (\Exception $e)
             {
-                $this->messageManager->addError(__('Hubo un problema generando la guía. Inténtelo de nuevo.'));
+                $this->messageManager->addErrorMessage(__('Hubo un problema generando la guía. Inténtelo de nuevo.'));
             }
         }
 

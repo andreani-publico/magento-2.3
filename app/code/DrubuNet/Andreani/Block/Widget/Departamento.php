@@ -1,7 +1,7 @@
 <?php
 /**
  * IDS 2016
- * Author Jhonattan Campo <jcampo@ids.net.ar>
+ * Author Drubu Team
  */
 namespace DrubuNet\Andreani\Block\Widget;
 

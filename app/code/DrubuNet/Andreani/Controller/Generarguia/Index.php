@@ -17,7 +17,7 @@ use Magento\Framework\App\Response\Http\FileFactory;
  *
  * @description
  *
- * @author Jhonattan Campo <jcampo@ids.net.ar>
+ * @author Drubu Team
  * @package DrubuNet\Andreani\Controller\Generarguia
  */
 class Index extends Action
@@ -97,7 +97,12 @@ class Index extends Action
             $orderShipments = $order->getShipmentsCollection();
             foreach($orderShipments->getData() AS $shipmentData)
             {
-                $andreaniDatosGuia = json_decode(unserialize($shipmentData['andreani_datos_guia']));
+                if($this->_andreaniHelper->getWebserviceMethod() == 'soap') {
+                    $andreaniDatosGuia = json_decode(unserialize($shipmentData['andreani_datos_guia']));
+                }
+                else{
+                    $andreaniDatosGuia = json_decode($shipmentData['andreani_datos_guia'],true);
+                }
                 $guiasArray[$shipmentData['increment_id']]     = $andreaniDatosGuia;
             }
 
@@ -106,8 +111,13 @@ class Index extends Action
 
         foreach($guiasArray AS $key => $guiaData)
         {
-            $object = $guiaData->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
-            $helper->crearCodigoDeBarras($object->NumeroAndreani);
+            if($this->_andreaniHelper->getWebserviceMethod() == 'soap') {
+                $object = $guiaData->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
+                $helper->crearCodigoDeBarras($object->NumeroAndreani);
+            }
+            else{
+                $helper->crearCodigoDeBarras($guiaData['response']['bultos'][0]['numeroDeEnvio']);
+            }
         }
 
         $pdfName    = date_timestamp_get(date_create()).'_'.$order->getIncrementId();
@@ -134,12 +144,18 @@ class Index extends Action
          * que se encarga de generar la guía en HTML. El tercer parámetro
          * fuerza la descarga (D) o fuerza el almacenamiento en el filesystem (F)
          */
-        if($helper->generateHtml2Pdf($pdfName,$html,'D'))
+        $resultPDF = $helper->generateHtml2Pdf($pdfName,$html,'D');
+        if(is_bool($resultPDF) && $resultPDF)
         {
             foreach($guiasArray AS $key => $guiaData)
             {
-                $object  = $guiaData->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
-                unlink($helper->getDirectoryPath('media')."/andreani/".$object->NumeroAndreani.'.png');
+                if($this->_andreaniHelper->getWebserviceMethod() == 'soap') {
+                    $object = $guiaData->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
+                    unlink($helper->getDirectoryPath('media') . "/andreani/" . $object->NumeroAndreani . '.png');
+                }
+                else{
+                    unlink($helper->getDirectoryPath('media') . "/andreani/" . $guiaData['response']['bultos'][0]['numeroDeEnvio'] . '.png');
+                }
             }
         }
 
