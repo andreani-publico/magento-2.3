@@ -18,7 +18,6 @@ class Admin extends \Magento\Backend\App\Action
     protected $_resultPageFactory;
 
     /**
-     * Admin constructor.
      * @param \Magento\Backend\App\Action\Context $context
      * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
      */
