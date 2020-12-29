@@ -83,6 +83,11 @@ class AndreaniSucursal extends AbstractCarrierOnline implements CarrierInterface
      */
     protected $_result;
 
+    /**
+     * @var \DrubuNet\Andreani\Model\Soap\Webservice
+     */
+    private $soapService;
+
     protected $orderFactory;
     /**
      * AndreaniEstandar constructor.
@@ -128,6 +133,7 @@ class AndreaniSucursal extends AbstractCarrierOnline implements CarrierInterface
         RateRequest $rateRequest,
         AndreaniHelper $andreaniHelper,
         \Magento\Checkout\Model\Session $_checkoutSession,
+        \DrubuNet\Andreani\Model\Soap\Webservice $webserviceSoap,
         array $data = []
     ) {
         $this->_rateResultFactory = $rateFactory;
@@ -137,6 +143,7 @@ class AndreaniSucursal extends AbstractCarrierOnline implements CarrierInterface
         $this->_carrierParams     = [];
         $this->orderFactory = $orderFactory;
         $this->_checkoutSession = $_checkoutSession;
+        $this->soapService = $webserviceSoap;
         parent::__construct(
             $scopeConfig,
             $rateErrorFactory,
@@ -346,7 +353,7 @@ class AndreaniSucursal extends AbstractCarrierOnline implements CarrierInterface
             $dataGuia["lastrequest"] = $dataGuiaAux->lastrequest;
         }
         if (!$dataGuia) {
-            $dataGuia = $webservice->GenerarEnviosDeEntregaYRetiroConDatosDeImpresion($carrierParams, $this->_code);          
+            $dataGuia = $this->soapService->GenerarEnviosDeEntregaYRetiroConDatosDeImpresion($carrierParams, $this->_code);          
         }
         $response = [];
 

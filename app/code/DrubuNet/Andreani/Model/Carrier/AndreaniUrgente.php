@@ -415,7 +415,7 @@ class AndreaniUrgente extends AbstractCarrierOnline implements CarrierInterface
             $dataGuia["lastrequest"] = $dataGuiaAux->lastrequest;
         }
         if (!$dataGuia) {
-            $dataGuia = $webservice->GenerarEnviosDeEntregaYRetiroConDatosDeImpresion($carrierParams, $this->_code);          
+            $dataGuia = $this->soapService->GenerarEnviosDeEntregaYRetiroConDatosDeImpresion($carrierParams, $this->_code);          
         }
         $response = [];
 
