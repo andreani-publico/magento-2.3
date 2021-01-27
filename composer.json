@@ -1,0 +1,35 @@
+{
+    "name": "andreani/module-andreani-magento-2.3",
+    "type": "magento2-module",
+    "autoload": {
+        "files": [
+            "app/code/DrubuNet/Andreani/registration.php"
+        ],
+        "psr-4": {
+            "DrubuNet\\Andreani\\": "app/code/DrubuNet/Andreani/"
+        }
+    },
+    "require": {
+        "spipu/html2pdf": "^5.2",
+        "magento/framework": "^102.0",
+        "magento/module-backend": "^101.0",
+        "magento/module-store": "^101.0",
+        "magento/module-config": "^101.1",
+        "magento/module-checkout": "^100.3",
+        "magento/module-customer": "^102.0",
+        "magento/module-sales": "^102.0",
+        "magento/module-ui": "^101.1",
+        "magento/module-shipping": "^100.3",
+        "psr/log": "^1.1",
+        "ext-json": "*",
+        "magento/module-catalog": "^103.0",
+        "magento/module-quote": "^101.1",
+        "magento/module-directory": "^100.3",
+        "magento/module-catalog-inventory": "^100.3",
+        "magento/module-eav": "^102.0"
+    },
+    "repositories": [{
+            "type": "composer",
+            "url": "https://repo.magento.com/"
+        }]
+}
