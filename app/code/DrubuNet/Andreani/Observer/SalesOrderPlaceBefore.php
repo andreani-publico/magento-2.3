@@ -59,29 +59,6 @@ class SalesOrderPlaceBefore implements ObserverInterface
             $order->setCodigoSucursalAndreani($codigoSucursalAndreani);
         }
 
-        /**
-         * Parche para hacer que se guarde la altura, piso, departamento, dni, celular y observaciones en el billing
-         * cuando el usuario es invitado. Esto funciona haciendo que la direccion de envio y facturacion sean las mismas,
-         * ya que sino los datos no coinciden.
-         */
-        $billingAddress
-            ->setFirstname($shippingAddress->getFirstname())
-            ->setLastname($shippingAddress->getLastname())
-            ->setCompany($shippingAddress->getCompany())
-            ->setCity($shippingAddress->getCity())
-            ->setRegionId($shippingAddress->getRegionId())
-            ->setRegion($shippingAddress->getRegion())
-            ->setPostcode($shippingAddress->getPostcode())
-            ->setCountryId($shippingAddress->getCountryId())
-            ->setTelephone($shippingAddress->getTelephone())
-            ->setDni(trim($shippingAddress->getDni()))
-            ->setAltura(trim($shippingAddress->getAltura()))
-            ->setPiso(trim($shippingAddress->getPiso()))
-            ->setDepartamento(trim($shippingAddress->getDepartamento()))
-            ->setObservaciones(trim($shippingAddress->getObservaciones()))
-            ->setCelular(trim($shippingAddress->getCelular()))
-            ->save();
-
         $order->setCustomerDni($shippingAddress->getDni());
 
         //Guardo los atributos custom en la direccion del usuario
