@@ -2,6 +2,7 @@
 
 namespace DrubuNet\Andreani\Setup;
 
+use Magento\Customer\Setup\CustomerSetup;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\UpgradeDataInterface;
@@ -89,6 +90,7 @@ class UpgradeData implements UpgradeDataInterface
     }
 
     private function addNewFields($setup){
+        /** @var CustomerSetup $customerSetup */
         $customerSetup = $this->customerSetupFactory->create(['setup' => $setup]);
         $attributesAddressInfo = [
             'dni' => [
@@ -97,13 +99,18 @@ class UpgradeData implements UpgradeDataInterface
                 'type' => 'varchar',
                 'source' => '',
                 'required' => false,
-                'position' => 118,
+                'position' => 52,
                 'visible' => true,
                 'system' => false,
                 'is_visible_in_grid' => false,
                 'is_filterable_in_grid' => false,
                 'is_searchable_in_grid' => false,
-                'backend' => ''
+                'backend' => '',
+                'validate_rules' => [
+                    'min_text_length' => 6,
+                    'max_text_length' => 8,
+                    'input_validation' => 'numeric',
+                ],
             ],
             'celular' => [
                 'label' => 'Celular',
@@ -117,21 +124,31 @@ class UpgradeData implements UpgradeDataInterface
                 'is_visible_in_grid' => false,
                 'is_filterable_in_grid' => false,
                 'is_searchable_in_grid' => false,
-                'backend' => ''
+                'backend' => '',
+                'validate_rules' => [
+                    'min_text_length' => 7,
+                    'max_text_length' => 20,
+                    'input_validation' => 'numeric',
+                ],
             ],
             'altura' => [
                 'label' => 'Altura',
                 'input' => 'text',
                 'type' => 'varchar',
                 'source' => '',
-                'required' => false,
-                'position' => 70,
+                'required' => true,
+                'position' => 71,
                 'visible' => true,
                 'system' => false,
+                'is_user_defined' => true,
                 'is_visible_in_grid' => false,
                 'is_filterable_in_grid' => false,
                 'is_searchable_in_grid' => false,
-                'backend' => ''
+                'backend' => '',
+                'validate_rules' => [
+                    'min_text_length' => 1,
+                    'input_validation' => 'numeric',
+                ],
             ],
             'piso' => [
                 'label' => 'Piso',
@@ -139,7 +156,7 @@ class UpgradeData implements UpgradeDataInterface
                 'type' => 'varchar',
                 'source' => '',
                 'required' => false,
-                'position' => 71,
+                'position' => 72,
                 'visible' => true,
                 'system' => false,
                 'is_visible_in_grid' => false,
@@ -153,13 +170,13 @@ class UpgradeData implements UpgradeDataInterface
                 'type' => 'varchar',
                 'source' => '',
                 'required' => false,
-                'position' => 72,
+                'position' => 73,
                 'visible' => true,
                 'system' => false,
                 'is_visible_in_grid' => false,
                 'is_filterable_in_grid' => false,
                 'is_searchable_in_grid' => false,
-                'backend' => ''
+                'backend' => '',
             ],
             'observaciones' => [
                 'label' => 'Observaciones',
@@ -167,13 +184,13 @@ class UpgradeData implements UpgradeDataInterface
                 'type' => 'varchar',
                 'source' => '',
                 'required' => false,
-                'position' => 1000,
+                'position' => 250,
                 'visible' => true,
                 'system' => false,
                 'is_visible_in_grid' => false,
                 'is_filterable_in_grid' => false,
                 'is_searchable_in_grid' => false,
-                'backend' => ''
+                'backend' => '',
             ]
         ];
         foreach ($attributesAddressInfo as $attributeCode => $attributeParams) {

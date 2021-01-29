@@ -8,7 +8,7 @@ define([
     'Magento_Checkout/js/checkout-data',
     'Magento_Customer/js/customer-data',
     'mage/utils/wrapper',
-], function ($, ko, Component, selectShippingAddressAction, quote, formPopUpState, checkoutData, customerData,wrapper) {
+], function ($, ko, Component, selectShippingAddressAction, quote, formPopUpState, checkoutData, customerData, wrapper) {
     'use strict';
 
     return function (targetModule) {
@@ -17,16 +17,15 @@ define([
                 template: 'DrubuNet_Andreani/shipping-address/address-renderer/default'
             },
             getAltura: function () {
-                if(typeof(this.address()) != "undefined" && typeof(this.address().customAttributes) != "undefined") {
+                if (typeof (this.address()) != "undefined" && typeof (this.address().customAttributes) != "undefined") {
                     if (typeof (this.address().customAttributes.altura) != "undefined") {
                         return this.address().customAttributes.altura.value;
-                    }
-                    else{
+                    } else {
                         let alturaValue = null;
-                        $.each(this.address().customAttributes , function( key, value ) {
-                            if(!isNaN(key)){
-                                if(value.attribute_code == 'altura'){
-                                    return alturaValue = value.value.value;
+                        $.each(this.address().customAttributes, function (key, value) {
+                            if (!isNaN(key)) {
+                                if (value.attribute_code == 'altura') {
+                                    return alturaValue = (typeof value.value.value !== 'undefined') ? value.value.value : value.value;
                                 }
                             }
                         });
@@ -36,42 +35,41 @@ define([
                 return '';
             },
             getPiso: function () {
-                if(typeof(this.address()) != "undefined" && typeof(this.address().customAttributes) != "undefined") {
+                if (typeof (this.address()) != "undefined" && typeof (this.address().customAttributes) != "undefined") {
                     if (typeof (this.address().customAttributes.piso) != "undefined") {
                         return ', Piso: ' + this.address().customAttributes.piso.value;
                     } else {
                         let pisoValue = null;
-                        $.each(this.address().customAttributes , function( key, value ) {
-                            if(!isNaN(key)){
-                                if(value.attribute_code == 'piso'){
-                                    return pisoValue = value.value.value;
+                        $.each(this.address().customAttributes, function (key, value) {
+                            if (!isNaN(key)) {
+                                if (value.attribute_code == 'piso') {
+                                    return pisoValue = (typeof value.value.value !== 'undefined') ? value.value.value : value.value;
                                 }
                             }
                         });
-			if(pisoValue){
-                        	return ', Piso: ' + pisoValue;
-			}
+                        if (pisoValue) {
+                            return ', Piso: ' + pisoValue;
+                        }
                     }
                 }
                 return '';
             },
             getDepartamento: function () {
-                if(typeof(this.address()) != "undefined" && typeof(this.address().customAttributes) != "undefined") {
-                    if(typeof(this.address().customAttributes.departamento) != "undefined") {
+                if (typeof (this.address()) != "undefined" && typeof (this.address().customAttributes) != "undefined") {
+                    if (typeof (this.address().customAttributes.departamento) != "undefined") {
                         return ', Departamento: ' + this.address().customAttributes.departamento.value;
-                    }
-                    else {
+                    } else {
                         let deptoValue = null;
-                        $.each(this.address().customAttributes , function( key, value ) {
-                            if(!isNaN(key)){
-                                if(value.attribute_code == 'departamento'){
-                                    return deptoValue = value.value.value;
+                        $.each(this.address().customAttributes, function (key, value) {
+                            if (!isNaN(key)) {
+                                if (value.attribute_code == 'departamento') {
+                                    return deptoValue = (typeof value.value.value !== 'undefined') ? value.value.value : value.value;
                                 }
                             }
                         });
-			if(deptoValue){
-	                        return ', Departamento: ' + deptoValue;
-			}
+                        if (deptoValue) {
+                            return ', Departamento: ' + deptoValue;
+                        }
                     }
                 }
                 return '';

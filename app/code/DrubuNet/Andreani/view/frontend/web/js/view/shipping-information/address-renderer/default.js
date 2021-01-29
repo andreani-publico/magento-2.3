@@ -6,7 +6,7 @@ define([
     'Magento_Customer/js/customer-data',
     'Magento_Checkout/js/model/quote',
     'Magento_Customer/js/model/customer'
-], function ($, wrapper,ko,Component, customerData,quote,customer) {
+], function ($, wrapper, ko, Component, customerData, quote, customer) {
     'use strict';
 
     return function (targetModule) {
@@ -16,59 +16,65 @@ define([
             },
             isCustomerLoggedIn: customer.isLoggedIn,
             quote: quote,
-            getAltura: function ()
-            {
-                if(!isCustomerLoggedIn && jQuery('#shipping-new-address-form input[name="altura"]').val())
-                {
-                    return jQuery('#shipping-new-address-form input[name="altura"]').val();
-                }
-
-                if(typeof this.address() != "undefined" && typeof this.address().customAttributes != "undefined")
-                {
-                    if(typeof this.address().customAttributes.altura != "undefined"
-                        && typeof this.address().customAttributes.altura.value != "undefined")
+            getAltura: function () {
+                if (typeof (this.address()) != "undefined" && typeof (this.address().customAttributes) != "undefined") {
+                    if (typeof (this.address().customAttributes.altura) != "undefined") {
                         return this.address().customAttributes.altura.value;
-                    if(typeof this.address().customAttributes.altura != "undefined")
-                        return this.address().customAttributes.altura;
-
-                    return '';
+                    } else {
+                        let alturaValue = null;
+                        $.each(this.address().customAttributes, function (key, value) {
+                            if (!isNaN(key)) {
+                                if (value.attribute_code == 'altura') {
+                                    alturaValue = (typeof value.value.value !== 'undefined') ? value.value.value : value.value;
+                                }
+                            }
+                        });
+                        return alturaValue;
+                    }
                 }
+
+                return '';
             },
-            getPiso: function ()
-            {
-                if(!isCustomerLoggedIn && jQuery('#shipping-new-address-form input[name="piso"]').val())
-                {
-                    return ', Piso: ' + jQuery('#shipping-new-address-form input[name="piso"]').val();
-                }
-
-                if(typeof this.address() != "undefined" && typeof this.address().customAttributes != "undefined")
-                {
-                    if(typeof this.address().customAttributes.piso != "undefined"
-                        && typeof this.address().customAttributes.piso.value != "undefined")
+            getPiso: function () {
+                if(typeof(this.address()) != "undefined" && typeof(this.address().customAttributes) != "undefined") {
+                    if (typeof (this.address().customAttributes.piso) != "undefined") {
                         return ', Piso: ' + this.address().customAttributes.piso.value;
-                    if(typeof this.address().customAttributes.piso != "undefined")
-                        return ', Piso: ' + this.address().customAttributes.piso;
-
-                    return '';
+                    } else {
+                        let pisoValue = null;
+                        $.each(this.address().customAttributes , function( key, value ) {
+                            if(!isNaN(key)){
+                                if(value.attribute_code == 'piso'){
+                                    return pisoValue = (typeof value.value.value !== 'undefined') ? value.value.value : value.value;
+                                }
+                            }
+                        });
+                        if(pisoValue){
+                            return ', Piso: ' + pisoValue;
+                        }
+                    }
                 }
+                return '';
             },
-            getDepartamento: function ()
-            {
-                if(!isCustomerLoggedIn && jQuery('#shipping-new-address-form input[name="departamento"]').val())
-                {
-                    return ', Departamento: ' + jQuery('#shipping-new-address-form input[name="departamento"]').val();
-                }
-
-                if(typeof this.address() != "undefined" && typeof this.address().customAttributes != "undefined")
-                {
-                    if(typeof this.address().customAttributes.departamento != "undefined"
-                        && typeof this.address().customAttributes.departamento.value != "undefined")
+            getDepartamento: function () {
+                if(typeof(this.address()) != "undefined" && typeof(this.address().customAttributes) != "undefined") {
+                    if(typeof(this.address().customAttributes.departamento) != "undefined") {
                         return ', Departamento: ' + this.address().customAttributes.departamento.value;
-                    if(typeof this.address().customAttributes.departamento != "undefined")
-                        return ', Departamento: ' + this.address().customAttributes.departamento;
-
-                    return '';
+                    }
+                    else {
+                        let deptoValue = null;
+                        $.each(this.address().customAttributes , function( key, value ) {
+                            if(!isNaN(key)){
+                                if(value.attribute_code == 'departamento'){
+                                    return deptoValue = (typeof value.value.value !== 'undefined') ? value.value.value : value.value;
+                                }
+                            }
+                        });
+                        if(deptoValue){
+                            return ', Departamento: ' + deptoValue;
+                        }
+                    }
                 }
+                return '';
             }
         });
     };
