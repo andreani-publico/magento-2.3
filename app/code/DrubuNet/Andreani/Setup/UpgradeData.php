@@ -3,11 +3,15 @@
 namespace DrubuNet\Andreani\Setup;
 
 use Magento\Customer\Setup\CustomerSetup;
+use Magento\Eav\Model\Config;
+use Magento\Eav\Model\Entity\Attribute\Set;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\UpgradeDataInterface;
 use Magento\Eav\Setup\EavSetupFactory;
 use Magento\Customer\Setup\CustomerSetupFactory;
+use Zend_Validate_Exception;
 
 /**
  * Class UpgradeData
@@ -24,17 +28,37 @@ class UpgradeData implements UpgradeDataInterface
     private $_eavSetupFactory;
 
     /**
+     * @var Config
+     */
+    private Config $eavConfig;
+
+    /**
+     * @var CustomerSetupFactory
+     */
+    private CustomerSetupFactory $customerSetupFactory;
+
+    /**
+     * @var Set
+     */
+    private Set $attributeSet;
+
+    /**
      * InstallData constructor.
      * @param EavSetupFactory $eavSetupFactory
      * @param CustomerSetupFactory $customerSetupFactory
+     * @param Config $eavConfig
+     * @param Set $attributeSet
      */
     public function __construct(
         EavSetupFactory $eavSetupFactory,
-        CustomerSetupFactory $customerSetupFactory
+        CustomerSetupFactory $customerSetupFactory,
+        Config $eavConfig,
+        Set $attributeSet
     ) {
         $this->_eavSetupFactory = $eavSetupFactory;
-
         $this->customerSetupFactory = $customerSetupFactory;
+        $this->eavConfig = $eavConfig;
+        $this->attributeSet = $attributeSet;
     }
 
     /**
@@ -89,7 +113,17 @@ class UpgradeData implements UpgradeDataInterface
         $customerAddressSetup->removeAttribute('customer_address', "observaciones");
     }
 
-    private function addNewFields($setup){
+    /**
+     * @param $setup
+     * @throws LocalizedException
+     * @throws Zend_Validate_Exception
+     */
+    private function addNewFields($setup)
+    {
+        $customerEntity = $this->eavConfig->getEntityType('customer_address');
+        $attributeSetId = $customerEntity->getDefaultAttributeSetId();
+        $attributeGroupId = $this->attributeSet->getDefaultGroupId($attributeSetId);
+
         /** @var CustomerSetup $customerSetup */
         $customerSetup = $this->customerSetupFactory->create(['setup' => $setup]);
         $attributesAddressInfo = [
@@ -211,6 +245,8 @@ class UpgradeData implements UpgradeDataInterface
                     $attributeCode
                 )
                 ->addData([
+                    'attribute_set_id' => $attributeSetId,
+                    'attribute_group_id' => $attributeGroupId,
                     'used_in_forms' => [
                         'customer_address_edit',
                         'customer_register_address'
