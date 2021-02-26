@@ -30,17 +30,17 @@ class UpgradeData implements UpgradeDataInterface
     /**
      * @var Config
      */
-    private Config $eavConfig;
+    private $eavConfig;
 
     /**
      * @var CustomerSetupFactory
      */
-    private CustomerSetupFactory $customerSetupFactory;
+    private $customerSetupFactory;
 
     /**
      * @var Set
      */
-    private Set $attributeSet;
+    private $attributeSet;
 
     /**
      * InstallData constructor.
