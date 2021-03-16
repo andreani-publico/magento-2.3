@@ -123,7 +123,7 @@ class Index extends Action
             return $this->_fileFactory->create(
                 $pdfName,
                 $outputPdf->render(),
-                \Magento\Framework\App\Filesystem\DirectoryList::VAR_DIR, // this pdf will be saved in var directory with the name example.pdf
+                \Magento\Framework\App\Filesystem\DirectoryList::VAR_DIR,
                 'application/pdf'
             );
         }
