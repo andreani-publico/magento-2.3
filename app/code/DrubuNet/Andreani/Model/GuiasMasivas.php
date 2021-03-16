@@ -310,6 +310,10 @@ class GuiasMasivas
                             array(
                                 "meta" => "idCliente",
                                 "contenido" => $order->getIncrementId()
+                            ),
+                            array(
+                                "meta" => "observaciones",
+                                "contenido" => $order->getShippingAddress()->getObservaciones()
                             )
                         ]
                     )

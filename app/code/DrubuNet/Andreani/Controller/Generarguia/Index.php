@@ -11,6 +11,7 @@ use DrubuNet\Andreani\Helper\Data as AndreaniHelper;
 use Magento\Framework\Controller\Result\RawFactory as ResultRawFactory;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\App\Response\Http\FileFactory;
+use Magento\Shipping\Model\Shipping\LabelGenerator;
 
 /**
  * Class Generarguia
@@ -36,7 +37,7 @@ class Index extends Action
      * @var AndreaniHelper
      */
     protected $_andreaniHelper;
-    
+
     /**
      * @var ResultRawFactory
      */
@@ -51,6 +52,11 @@ class Index extends Action
      * @var ResultFactory
      */
     protected $_resultRedirect;
+    private $webservice;
+    /**
+     * @var LabelGenerator
+     */
+    private $_labelGenerator;
 
     /**
      * Index constructor.
@@ -65,7 +71,9 @@ class Index extends Action
         JsonFactory $resultJsonFactory,
         AndreaniHelper $andreaniHelper,
         ResultRawFactory $resultRawFactory,
-        FileFactory $fileFactory
+        FileFactory $fileFactory,
+        \DrubuNet\Andreani\Model\Webservice $webservice,
+        LabelGenerator $labelGenerator
     )
     {
         $this->_resultPageFactory   = $resultPageFactory;
@@ -74,13 +82,13 @@ class Index extends Action
         $this->_resultRawFactory    = $resultRawFactory;
         $this->_fileFactory         = $fileFactory;
         $this->_resultRedirect      = $context->getResultFactory();
+        $this->webservice = $webservice;
+        $this->_labelGenerator = $labelGenerator;
 
         parent::__construct($context);
     }
 
-    /**
-     * @return $this
-     */
+
     public function execute()
     {
         //Recibe por parámetro el id de la orden, y manda a la librería
@@ -97,72 +105,28 @@ class Index extends Action
             $orderShipments = $order->getShipmentsCollection();
             foreach($orderShipments->getData() AS $shipmentData)
             {
-                if($this->_andreaniHelper->getWebserviceMethod() == 'soap') {
-                    $andreaniDatosGuia = json_decode(unserialize($shipmentData['andreani_datos_guia']));
-                }
-                else{
-                    $andreaniDatosGuia = json_decode($shipmentData['andreani_datos_guia'],true);
-                }
+                $andreaniDatosGuia = json_decode($shipmentData['andreani_datos_guia'],true);
                 $guiasArray[$shipmentData['increment_id']]     = $andreaniDatosGuia;
             }
-
         }
 
-
+        $labelContent = [];
         foreach($guiasArray AS $key => $guiaData)
         {
-            if($this->_andreaniHelper->getWebserviceMethod() == 'soap') {
-                $object = $guiaData->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
-                $helper->crearCodigoDeBarras($object->NumeroAndreani);
-            }
-            else{
-                $helper->crearCodigoDeBarras($guiaData['response']['bultos'][0]['numeroDeEnvio']);
-            }
+            $nroTrack = $guiaData['response']['bultos'][0]['numeroDeEnvio'];
+            $labelContent[] = $this->webservice->getOrderLabel($nroTrack);
         }
 
         $pdfName    = date_timestamp_get(date_create()).'_'.$order->getIncrementId();
-
-        /**
-         * Crea el bloque dinámicamente y le pasa los parámetros por array para
-         * que renderice la guía en html.
-         */
-        $block = $this->_view
-            ->getLayout()
-            ->createBlock('DrubuNet\Andreani\Block\Generarhtml',
-                "guia",
-                ['data' => [
-                    'order_id' => $orderId
-                ]
-                ])
-            ->setData('area', 'frontend')
-            ->setTemplate($helper->getGuiaTemplate());
-
-        $html = $block->toHtml();
-
-        /**
-         * Espera recibir "true" después de mandarle al método del helper
-         * que se encarga de generar la guía en HTML. El tercer parámetro
-         * fuerza la descarga (D) o fuerza el almacenamiento en el filesystem (F)
-         */
-        $resultPDF = $helper->generateHtml2Pdf($pdfName,$html,'D');
-        if(is_bool($resultPDF) && $resultPDF)
-        {
-            foreach($guiasArray AS $key => $guiaData)
-            {
-                if($this->_andreaniHelper->getWebserviceMethod() == 'soap') {
-                    $object = $guiaData->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
-                    unlink($helper->getDirectoryPath('media') . "/andreani/" . $object->NumeroAndreani . '.png');
-                }
-                else{
-                    unlink($helper->getDirectoryPath('media') . "/andreani/" . $guiaData['response']['bultos'][0]['numeroDeEnvio'] . '.png');
-                }
-            }
+        if(!empty($labelContent)) {
+            $outputPdf = $this->_labelGenerator->combineLabelsPdf($labelContent);
+            return $this->_fileFactory->create(
+                $pdfName,
+                $outputPdf->render(),
+                \Magento\Framework\App\Filesystem\DirectoryList::VAR_DIR, // this pdf will be saved in var directory with the name example.pdf
+                'application/pdf'
+            );
         }
-
-        $resultRedirect = $this->_resultRedirect->create(ResultFactory::TYPE_REDIRECT);
-        $resultRedirect->setUrl($this->_redirect->getRefererUrl());
-
-        return $resultRedirect;
     }
 }
 
