@@ -9,8 +9,10 @@
 
 namespace DrubuNet\Andreani\Controller\Adminhtml\Order;
 
+use Magento\Framework\App\Response\Http\FileFactory;
 use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
 use Magento\Backend\App\Action\Context;
+use Magento\Shipping\Model\Shipping\LabelGenerator;
 use Magento\Ui\Component\MassAction\Filter;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory;
 use DrubuNet\Andreani\Helper\Data as AndreaniHelper;
@@ -27,6 +29,20 @@ class MassImprimirGuias extends \Magento\Sales\Controller\Adminhtml\Order\Abstra
      * @var ShipmentCollectionFactory
      */
     protected $shipmentCollectionFactory;
+    /**
+     * @var FileFactory
+     */
+    private $_fileFactory;
+
+    /**
+     * @var \DrubuNet\Andreani\Model\Webservice
+     */
+    private $webservice;
+
+    /**
+     * @var LabelGenerator
+     */
+    private $_labelGenerator;
 
     /**
      * MassImprimirGuias constructor.
@@ -41,13 +57,19 @@ class MassImprimirGuias extends \Magento\Sales\Controller\Adminhtml\Order\Abstra
         Filter $filter,
         CollectionFactory $collectionFactory,
         AndreaniHelper $andreaniHelper,
-        ShipmentCollectionFactory $shipmentCollectionFactory
+        ShipmentCollectionFactory $shipmentCollectionFactory,
+        FileFactory $fileFactory,
+        \DrubuNet\Andreani\Model\Webservice $webservice,
+        LabelGenerator $labelGenerator
     )
     {
         parent::__construct($context, $filter);
         $this->collectionFactory = $collectionFactory;
         $this->_andreaniHelper = $andreaniHelper;
         $this->shipmentCollectionFactory = $shipmentCollectionFactory;
+        $this->_fileFactory = $fileFactory;
+        $this->webservice = $webservice;
+        $this->_labelGenerator = $labelGenerator;
     }
 
     /**
@@ -65,12 +87,7 @@ class MassImprimirGuias extends \Magento\Sales\Controller\Adminhtml\Order\Abstra
             {
                 $guiaContent = $order->getAndreaniDatosGuia();
                 if ($guiaContent) {
-                    if($this->_andreaniHelper->getWebserviceMethod() == 'soap') {
-                        $guiasContent[$order->getIncrementId()] = json_decode(unserialize($guiaContent));
-                    }
-                    else{
-                        $guiasContent[$order->getIncrementId()] = json_decode($guiaContent,true);
-                    }
+                    $guiasContent[$order->getIncrementId()] = json_decode($guiaContent,true);
                 }
             }
 
@@ -128,61 +145,23 @@ class MassImprimirGuias extends \Magento\Sales\Controller\Adminhtml\Order\Abstra
 
             $order_id = rtrim($order_id, ',');
 
-            /**
-             * Accede al objeto para crear el código de barras.
-             */
+            $labelContent = [];
             foreach($guiasContent AS $key => $guiaData)
             {
-                if($this->_andreaniHelper->getWebserviceMethod() == 'soap') {
-                    $object = $guiaData->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
-                    $helper->crearCodigoDeBarras($object->NumeroAndreani);
-                }
-                else{
-                    $helper->crearCodigoDeBarras($guiaData['response']['bultos'][0]['numeroDeEnvio']);
-                }
+                $nroTrack = $guiaData['response']['bultos'][0]['numeroDeEnvio'];
+                $labelContent[] = $this->webservice->getOrderLabel($nroTrack);
             }
 
             $pdfName        = 'guia_masiva_'.date_timestamp_get(date_create());
 
-            /**
-             * Crea el bloque dinámicamente y le pasa los parámetros por array para
-             * que renderice la guía en html.
-             */
-            $block = $this->_view
-                ->getLayout()
-                ->createBlock('DrubuNet\Andreani\Block\Generarhtmlmasivo',
-                    "guiamasiva",
-                    ['data' => [
-                        'order_id' => $order_id
-                    ]
-                    ])
-                ->setData('area', 'frontend')
-                ->setTemplate($this->_andreaniHelper->getGuiaMasivaTemplate());
-
-
-            $html = $block->toHtml();
-
-            /**
-             * Espera recibir "true" después de mandarle al método del helper
-             * que se encarga de generar la guía en HTML. El tercer parámetro
-             * fuerza la descarga (D) o fuerza el almacenamiento en el filesystem (F)
-             */
-            $result = $helper->generateHtml2Pdf($pdfName,$html,'D');
-            if(is_bool($result) && $result)
-            {
-                foreach($guiasContent AS $key => $guiaData)
-                {
-                    if($this->_andreaniHelper->getWebserviceMethod() == 'soap') {
-                        $object = $guiaData->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
-                        unlink($helper->getDirectoryPath('media') . "/andreani/" . $object->NumeroAndreani . '.png');
-                    }
-                    else{
-                        unlink($helper->getDirectoryPath('media') . "/andreani/" . $guiaData['response']['bultos'][0]['numeroDeEnvio'] . '.png');
-                    }
-                }
-            }
-            else{
-                return $result;
+            if(!empty($labelContent)) {
+                $outputPdf = $this->_labelGenerator->combineLabelsPdf($labelContent);
+                return $this->_fileFactory->create(
+                    $pdfName,
+                    $outputPdf->render(),
+                    \Magento\Framework\App\Filesystem\DirectoryList::VAR_DIR,
+                    'application/pdf'
+                );
             }
 
         } catch (\Exception $e) {

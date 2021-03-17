@@ -4,6 +4,7 @@ namespace DrubuNet\Andreani\Controller\Adminhtml\Guias;
 
 use DrubuNet\Andreani\Helper\Data as AndreaniHelper;
 use Magento\Framework\App\Response\Http\FileFactory;
+use Magento\Shipping\Model\Shipping\LabelGenerator;
 
 class Imprimir extends  \Magento\Backend\App\Action
 {
@@ -26,6 +27,13 @@ class Imprimir extends  \Magento\Backend\App\Action
      * @var FileFactory
      */
     protected $fileFactory;
+
+    private $webservice;
+    /**
+     * @var LabelGenerator
+     */
+    private $labelGenerator;
+
     /**
      * @param \Magento\Backend\App\Action\Context $context
      * @param \Magento\Framework\Registry    $coreRegistry
@@ -35,26 +43,26 @@ class Imprimir extends  \Magento\Backend\App\Action
         \Magento\Framework\Registry $coreRegistry,
         \Magento\Framework\View\Result\PageFactory $resultPageFactory,
         FileFactory $fileFactory,
-        AndreaniHelper $andreaniHelper
+        AndreaniHelper $andreaniHelper,
+        LabelGenerator $labelGenerator,
+        \DrubuNet\Andreani\Model\Webservice $webservice
     )
     {
         parent::__construct($context);
         $this->_coreRegistry        = $coreRegistry;
         $this->resultPageFactory    = $resultPageFactory;
         $this->fileFactory          = $fileFactory;
+        $this->labelGenerator               = $labelGenerator;
         $this->_andreaniHelper      = $andreaniHelper;
+        $this->webservice = $webservice;
     }
-    /**
-     * Add New Row Form page.
-     *
-     * @return \Magento\Backend\Model\View\Result\Page
-     */
+
     public function execute()
     {
         $params             = $this->getRequest()->getParams();
         $incrementId        = $params['increment_id'];
         $order_id           = $params['order_id'];
-        
+
         if($incrementId && $order_id)
         {
             try
@@ -63,79 +71,34 @@ class Imprimir extends  \Magento\Backend\App\Action
 
                 $shipmentOrder      = $helper->loadByIncrementId($incrementId);
                 $andreaniDatosGuia  = $shipmentOrder->getAndreaniDatosGuia();
-                if($this->_andreaniHelper->getWebserviceMethod() == 'soap') {
-                    $guiaContent = json_decode(unserialize($andreaniDatosGuia));
+                $guiaContent = json_decode($andreaniDatosGuia, true);
+                $object = $guiaContent['response']['bultos'][0]['numeroDeEnvio'];
 
-                    $object = $guiaContent->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
-                    $helper->crearCodigoDeBarras($object->NumeroAndreani);
-                }
-                else{
-                    $guiaContent = json_decode($andreaniDatosGuia, true);
-                    $object = $guiaContent['response']['bultos'][0]['numeroDeEnvio'];
-                    $helper->crearCodigoDeBarras($object);
-                }
-
-                $objectManager  = \Magento\Framework\App\ObjectManager::getInstance();
-                $storeManager   = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
-//                $urlHtml        = $storeManager->getStore()->getBaseUrl().'andreani/generarguia/shipmentguia/increment_id/'.$incrementId;
                 $pdfName        = $incrementId.'_'.date_timestamp_get(date_create());
 
-                /**
-                 * Crea el bloque dinámicamente y le pasa los parámetros por array para
-                 * que renderice la guía en html.
-                 */
-                if($this->_andreaniHelper->getWebserviceMethod() == 'soap'){
-                    $block = $this->_view
-                        ->getLayout()
-                        ->createBlock('DrubuNet\Andreani\Block\Shipmentguia',
-                            "shipmentguia",
-                            ['data' => [
-                                'increment_id' => $incrementId
-                            ]
-                            ])
-                        ->setData('area', 'frontend')
-                        ->setTemplate('DrubuNet_Andreani::shipmentguia.phtml');
+                $result = $this->webservice->getOrderLabel($object);
+                if(!empty($result)) {
+                    $outputPdf = $this->labelGenerator->combineLabelsPdf([$result]);
+                    return $this->fileFactory->create(
+                        $pdfName,
+                        $outputPdf->render(),
+                        \Magento\Framework\App\Filesystem\DirectoryList::VAR_DIR,
+                    );
                 }
                 else{
-                    $block = $this->_view
-                        ->getLayout()
-                        ->createBlock('DrubuNet\Andreani\Block\Shipmentguia',
-                            "shipmentguia",
-                            ['data' => [
-                                'increment_id' => $incrementId
-                            ]
-                            ])
-                        ->setData('area', 'frontend')
-                        ->setTemplate('DrubuNet_Andreani::shipmentguiarest.phtml');
-                }
-
-                $html = $block->toHtml();
-
-                /**
-                 * Espera recibir "true" después de mandarle al método del helper
-                 * que se encarga de generar la guía en HTML. El tercer parámetro
-                 * fuerza la descarga (D) o fuerza el almacenamiento en el filesystem (F)
-                 */
-                $result = $helper->generateHtml2Pdf($pdfName,$html,'D');
-                if(is_bool($result) && $result)
-                {
-                    $this->messageManager->addSuccess( __('La guía se generó correctamente.') );
-                    ($this->_andreaniHelper->getWebserviceMethod() == 'soap') ? unlink($helper->getDirectoryPath('media')."/andreani/".$object->NumeroAndreani.'.png') : unlink($helper->getDirectoryPath('media')."/andreani/".$object.'.png');
-                }
-                else{
-                    $this->messageManager->addErrorMessage(__('Hubo un problema generando la guía. ' . $result));
+                    $this->messageManager->addErrorMessage("No se encontraron pdfs a descargar");
                 }
 
             }catch (\Exception $e)
             {
                 $this->messageManager->addErrorMessage(__('Hubo un problema generando la guía. Inténtelo de nuevo.'));
+                $resultRedirect = $this->resultRedirectFactory->create()->setPath('sales/shipment/index');
+                return $resultRedirect;
             }
         }
 
-        $resultRedirect = $this->resultRedirectFactory->create()->setPath('sales/shipment/index');
-        return $resultRedirect;
-    }
 
+    }
     /**
      * @return bool
      */
