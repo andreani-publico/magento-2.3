@@ -87,6 +87,11 @@ class MassImprimirGuiasAndreani extends \Magento\Sales\Controller\Adminhtml\Orde
     private $logger;
 
     /**
+     * @var \DrubuNet\Andreani\Model\Webservice
+     */
+    private $webservice;
+
+    /**
      * MassImprimirGuiasAndreani constructor.
      * @param Context $context
      * @param Filter $filter
@@ -113,7 +118,8 @@ class MassImprimirGuiasAndreani extends \Magento\Sales\Controller\Adminhtml\Orde
         JsonFactory $resultJsonFactory,
         AndreaniHelper $andreaniHelper,
         AndreaniEmailHelper $andreaniEmailHelper,
-        LoggerInterface $loggerInterface
+        LoggerInterface $loggerInterface,
+        \DrubuNet\Andreani\Model\Webservice $webservice
     ) {
         $this->fileFactory                  = $fileFactory;
         $this->collectionFactory            = $collectionFactory;
@@ -125,6 +131,7 @@ class MassImprimirGuiasAndreani extends \Magento\Sales\Controller\Adminhtml\Orde
         $this->_andreaniHelper              = $andreaniHelper;
         $this->_andreaniEmailHelper         = $andreaniEmailHelper;
         $this->logger                       = $loggerInterface;
+        $this->webservice = $webservice;
 
         parent::__construct($context, $filter);
     }
@@ -239,12 +246,7 @@ class MassImprimirGuiasAndreani extends \Magento\Sales\Controller\Adminhtml\Orde
                 {
                     $guiaContent = $shipment->getAndreaniDatosGuia();
                     if ($guiaContent) {
-                        if($this->_andreaniHelper->getWebserviceMethod() == 'soap') {
-                            $guiasContent[$shipment->getIncrementId()] = json_decode(unserialize($guiaContent));
-                        }
-                        else{
-                            $guiasContent[$shipment->getIncrementId()] = json_decode($guiaContent,true);
-                        }
+                        $guiasContent[$shipment->getIncrementId()] = json_decode($guiaContent,true);
                     }
                 }
             }
@@ -257,7 +259,7 @@ class MassImprimirGuiasAndreani extends \Magento\Sales\Controller\Adminhtml\Orde
              */
             if (!empty($guiasContent))
             {
-                $this->_generarGuias($guiasContent,$collection->getAllIds());
+                //$this->_generarGuias($guiasContent,$collection->getAllIds());
             }
         }
         catch (Exception $e)
@@ -276,257 +278,40 @@ class MassImprimirGuiasAndreani extends \Magento\Sales\Controller\Adminhtml\Orde
      */
     protected function _generarGuias($guiasContent,$ordersIds)
     {
-        try
-        {
-            $helper             = $this->_andreaniHelper;
+        try {
+            $helper = $this->_andreaniHelper;
             $order_id = '';
 
             /**
              * Concatena los ID para mandarlos por comas en la URL.
              */
-            foreach($ordersIds AS $key => $orderId)
-            {
-                $order_id.=$orderId.',';
+            foreach ($ordersIds as $key => $orderId) {
+                $order_id .= $orderId . ',';
             }
 
             $order_id = rtrim($order_id, ',');
 
-            /**
-             * Accede al objeto para crear el código de barras.
-             */
-            foreach($guiasContent AS $key => $guiaData)
-            {
-                if($this->_andreaniHelper->getWebserviceMethod() == 'soap') {
-                    $object = $guiaData->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
-                    $helper->crearCodigoDeBarras($object->NumeroAndreani);
-                }
-                else{
-                    $numeroDeEnvio = $guiaData['response']['bultos'][0]['numeroDeEnvio'];
-                    $helper->crearCodigoDeBarras($numeroDeEnvio);
-                }
+            $labelContent = [];
+            foreach ($guiasContent as $key => $guiaData) {
+                $nroTrack = $guiaData['response']['bultos'][0]['numeroDeEnvio'];
+                $labelContent[] = $this->webservice->getOrderLabel($nroTrack);
             }
 
-            $pdfName        = 'guia_masiva_'.date_timestamp_get(date_create());
-
-            /**
-             * Crea el bloque dinámicamente y le pasa los parámetros por array para
-             * que renderice la guía en html.
-             */
-            $block = $this->_view
-                ->getLayout()
-                ->createBlock('DrubuNet\Andreani\Block\Generarhtmlmasivo',
-                    "guiamasiva",
-                    ['data' => [
-                        'order_id' => $order_id
-                    ]
-                    ])
-                ->setData('area', 'frontend')
-                //->setTemplate('DrubuNet_Andreani::guiamasiva.phtml');
-                ->setTemplate($this->_andreaniHelper->getGuiaMasivaTemplate());
-
-            $html = $block->toHtml();
-
-            /**
-             * Espera recibir "true" después de mandarle al método del helper
-             * que se encarga de generar la guía en HTML. El tercer parámetro
-             * fuerza la descarga (D) o fuerza el almacenamiento en el filesystem (F)
-             */
-            if($helper->generateHtml2Pdf($pdfName,$html,'F'))
-            {
-                $filePath 		= $helper->getGuiaPdfPath($pdfName);
-                $andreaniEmailHelper = $this->_andreaniEmailHelper;
-
-                $senderTransEmail   = $helper->getTransEmails('contact_general');
-                $receiverTransEmail = $helper->getTransEmails('andreani');
-
-                $receiverInfo = [
-                    'name'  => $receiverTransEmail['name'],
-                    'email' => $receiverTransEmail['email']
-
-                ];
-
-                $senderInfo = [
-                    'name'  => $senderTransEmail['name'],
-                    'email' => $senderTransEmail['email'],
-                ];
-
-                /**
-                 * Asigna el valores a las variables.
-                 */
-                $emailTemplateVariables                 = [];
-                $emailTemplateVariables['pdfName']      = $pdfName;
-                $emailTemplateVariables['pdfPath']      = $filePath;
-
-
-                /**
-                 * Notifica por mail que se creó una guía.
-                 */
-                $andreaniEmailHelper->notificarGuiaGenerada(
-                    $emailTemplateVariables,
-                    $senderInfo,
-                    $receiverInfo
+            $pdfName = 'guia_masiva_' . date_timestamp_get(date_create());
+            if(!empty($labelContent)) {
+                $outputPdf = $this->labelGenerator->combineLabelsPdf($labelContent);
+                return $this->fileFactory->create(
+                    $pdfName,
+                    $outputPdf->render(),
+                    \Magento\Framework\App\Filesystem\DirectoryList::VAR_DIR,
                 );
-                $this->messageManager->addSuccess( __('La guía se generó correctamente.') );
-
-                foreach($guiasContent AS $key => $guiaData)
-                {
-                    if($this->_andreaniHelper->getWebserviceMethod() == 'soap'){
-                        $object  = $guiaData->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
-                        unlink($helper->getDirectoryPath('media')."/andreani/".$object->NumeroAndreani.'.png');
-                    }
-                    else{
-                        $numeroDeEnvio = $guiaData['response']['bultos'][0]['numeroDeEnvio'];
-                        unlink($helper->getDirectoryPath('media')."/andreani/".$numeroDeEnvio.'.png');
-                    }
-                }
+            }
+            else{
+                $this->messageManager->addErrorMessage("No se encontraron pdfs a descargar");
             }
 
-        }catch (Exception $e)
-        {
-            $this->messageManager->addError(__('Hubo un problema generando la guía. Inténtelo de nuevo.'));
-            $this->logger->error($e->getMessage());
-        }
-    }
-
-
-    /**
-     * @param $guiasContent
-     * @param $ordersIds
-     * @param null $shipment
-     */
-    public function _generarGuiasMasivas($guiasContent,$ordersIds, $shipment = null)
-    {
-        try
-        {
-            $helper                 = $this->_andreaniHelper;
-            $order_id               = '';
-
-            /**
-             * Concatena los ID para mandarlos por comas en la URL.
-             */
-            foreach($ordersIds AS $key => $orderId)
-            {
-                $order_id.=$orderId.',';
-            }
-
-            $order_id = rtrim($order_id, ',');
-
-            /**
-             * Accede al objeto para crear el código de barras.
-             */
-            foreach($guiasContent AS $key => $guiaData)
-            {
-
-                if($this->_andreaniHelper->getWebserviceMethod() == 'soap'){
-                    $object = $guiaData->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
-                    $helper->crearCodigoDeBarras($object->NumeroAndreani);
-                }
-                else{
-                    $numeroDeEnvio = $guiaData['response']['bultos'][0]['numeroDeEnvio'];
-                    $helper->crearCodigoDeBarras($numeroDeEnvio);
-                }
-            }
-
-            /**
-             * Instancia la url de la tienda que posteriormente recibirá los parámetros para armar la guía.
-             */
-            $pdfName        = 'guia_masiva_'.date_timestamp_get(date_create());
-
-            /**
-             * Crea el bloque dinámicamente y le pasa los parámetros por array para
-             * que renderice la guía en html.
-             */
-            $block = $this->_view
-                ->getLayout()
-                ->createBlock('DrubuNet\Andreani\Block\Generarhtmlmasivo',
-                    "guiamasiva",
-                    ['data' => [
-                        'order_id' => $order_id
-                    ]
-                    ])
-                ->setData('area', 'frontend')
-                //->setTemplate('DrubuNet_Andreani::guiamasiva.phtml');
-                ->setTemplate($this->_andreaniHelper->getGuiaMasivaTemplate());
-
-            $html = $block->toHtml();
-
-            /**
-             * Espera recibir "true" después de mandarle al método del helper
-             * que se encarga de generar la guía en HTML. El tercer parámetro
-             * fuerza la descarga (D) o fuerza el almacenamiento en el filesystem (F)
-             */
-            if(!$shipment)
-            {
-                if($helper->generateHtml2Pdf($pdfName,$html,'F'))
-                {
-                    $filePath 		= $helper->getGuiaPdfPath($pdfName);
-                    $andreaniEmailHelper = $this->_andreaniEmailHelper;
-
-                    $senderTransEmail   = $helper->getTransEmails('contact_general');
-                    $receiverTransEmail = $helper->getTransEmails('andreani');
-
-                    $receiverInfo = [
-                        'name'  => $receiverTransEmail['name'],
-                        'email' => $receiverTransEmail['email']
-
-                    ];
-
-                    $senderInfo = [
-                        'name'  => $senderTransEmail['name'],
-                        'email' => $senderTransEmail['email'],
-                    ];
-
-                    /**
-                     * Asigna el valores a las variables.
-                     */
-                    $emailTemplateVariables                 = [];
-                    $emailTemplateVariables['pdfName']      = $pdfName;
-                    $emailTemplateVariables['pdfPath']      = $filePath;
-
-                    /**
-                     * Notifica por mail que se creó una guía.
-                     */
-                $andreaniEmailHelper->notificarGuiaGenerada(
-                    $emailTemplateVariables,
-                    $senderInfo,
-                    $receiverInfo
-                );
-                    $this->messageManager->addSuccessMessage(__('La guía se generó correctamente.'));
-
-                    foreach($guiasContent AS $key => $guiaData)
-                    {
-                        if($this->_andreaniHelper->getWebserviceMethod() == 'soap'){
-                            $object  = $guiaData->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
-                            unlink($helper->getDirectoryPath('media')."/andreani/".$object->NumeroAndreani.'.png');
-                        }
-                        else{
-                            $numeroDeEnvio = $guiaData['response']['bultos'][0]['numeroDeEnvio'];
-                            unlink($helper->getDirectoryPath('media')."/andreani/".$numeroDeEnvio.'.png');
-                        }
-                    }
-                }
-            }
-            else
-            {
-                $helper->generateHtml2Pdf($pdfName,$html,'D');
-                foreach($guiasContent AS $key => $guiaData)
-                {
-                    if($this->_andreaniHelper->getWebserviceMethod() == 'soap'){
-                        $object  = $guiaData->datosguia->GenerarEnviosDeEntregaYRetiroConDatosDeImpresionResult;
-                        unlink($helper->getDirectoryPath('media')."/andreani/".$object->NumeroAndreani.'.png');
-                    }
-                    else{
-                        $numeroDeEnvio = $guiaData['response']['bultos'][0]['numeroDeEnvio'];
-                        unlink($helper->getDirectoryPath('media')."/andreani/".$numeroDeEnvio.'.png');
-                    }
-                }
-            }
-
-        }
-        catch (Exception $e)
-        {
-            $this->messageManager->addErrorMessage(__('Hubo un problema generando la guía. Inténtelo de nuevo.'));
-            $this->logger->error($e->getMessage());
+        }catch (\Exception $e){
+            $this->messageManager->addErrorMessage($e->getMessage());
         }
     }
 

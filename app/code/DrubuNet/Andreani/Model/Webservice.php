@@ -71,6 +71,16 @@ class Webservice
         return $this->doRequest($url,\Zend_Http_Client::GET, $encoded)->getBody();
     }
 
+    public function getOrderLabel($andreaniNumber){
+        $url = $this->url . '/v2/ordenes-de-envio/' . $andreaniNumber . '/etiquetas';
+        if(empty($this->token)){
+            $this->login();
+        }
+        $encoded['code'] = "x-authorization-token";
+        $encoded['value'] = $this->token;
+        return $this->doRequest($url,\Zend_Http_Client::GET, $encoded)->getBody();
+    }
+
     /**
      * @description Lista todas (o una) las sucursales de Andreani que son pausibles de admitir o retirar envíos
      * @return array
@@ -143,6 +153,9 @@ class Webservice
     }
 
     private function doRequest($url, $method, $header = null, $params = null){
+        /**
+         * @var \Magento\Framework\HTTP\ZendClient $client
+         */
         $client = $this->httpClientFactory->create();
         $client->setUri($url);
         $client->setMethod($method);

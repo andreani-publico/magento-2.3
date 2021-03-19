@@ -14,7 +14,6 @@ class WebserviceMethod implements ArrayInterface
     public function toOptionArray()
     {
         return [
-            'soap'    => 'SOAP',
             'rest'     => 'REST',
         ];
     }
