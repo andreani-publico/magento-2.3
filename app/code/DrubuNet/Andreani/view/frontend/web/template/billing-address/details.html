@@ -8,9 +8,9 @@
     <!-- ko text: currentBillingAddress().prefix --><!-- /ko --> <!-- ko text: currentBillingAddress().firstname --><!-- /ko -->
     <!-- ko text: currentBillingAddress().lastname --><!-- /ko --> <!-- ko text: currentBillingAddress().suffix --><!-- /ko --><br/>
     <!-- ko text: currentBillingAddress().street --><!-- /ko -->
-    <span class="altura" data-bind="text:getAltura()"></span>
-    <span class="piso" data-bind="text:getPiso()"></span>
-    <span class="departamento" data-bind="text:getDepartamento()"></span>
+    <!-- ko text: getAltura() --><!-- /ko -->
+    <!-- ko text: getPiso() --><!-- /ko -->
+    <!-- ko text: getDepartamento() --><!-- /ko -->
     <br/>
     <!-- ko text: currentBillingAddress().city --><!-- /ko -->, <!-- ko text: currentBillingAddress().region --><!-- /ko --> <!-- ko text: currentBillingAddress().postcode --><!-- /ko --><br/>
     <!-- ko text: getCountryName(currentBillingAddress().countryId) --><!-- /ko --><br/>
