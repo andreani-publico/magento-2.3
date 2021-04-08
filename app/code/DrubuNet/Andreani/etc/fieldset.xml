@@ -10,6 +10,58 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:DataObject/etc/fieldset.xsd">
     <scope id="global">
+        <fieldset id="extra_checkout_shipping_address_fields">
+            <field name="dni">
+                <aspect name="to_order_address" />
+                <aspect name="to_customer_address" />
+            </field>
+            <field name="altura">
+                <aspect name="to_order_address" />
+                <aspect name="to_customer_address" />
+            </field>
+            <field name="piso">
+                <aspect name="to_order_address" />
+                <aspect name="to_customer_address" />
+            </field>
+            <field name="departamento">
+                <aspect name="to_order_address" />
+                <aspect name="to_customer_address" />
+            </field>
+            <field name="celular">
+                <aspect name="to_order_address" />
+                <aspect name="to_customer_address" />
+            </field>
+            <field name="observaciones">
+                <aspect name="to_order_address" />
+                <aspect name="to_customer_address" />
+            </field>
+        </fieldset>
+        <fieldset id="extra_checkout_billing_address_fields">
+            <field name="dni">
+                <aspect name="to_order_address" />
+                <aspect name="to_customer_address" />
+            </field>
+            <field name="altura">
+                <aspect name="to_order_address" />
+                <aspect name="to_customer_address" />
+            </field>
+            <field name="piso">
+                <aspect name="to_order_address" />
+                <aspect name="to_customer_address" />
+            </field>
+            <field name="departamento">
+                <aspect name="to_order_address" />
+                <aspect name="to_customer_address" />
+            </field>
+            <field name="celular">
+                <aspect name="to_order_address" />
+                <aspect name="to_customer_address" />
+            </field>
+            <field name="observaciones">
+                <aspect name="to_order_address" />
+                <aspect name="to_customer_address" />
+            </field>
+        </fieldset>
         <fieldset id="sales_convert_quote_address">
             <field name="dni">
                 <aspect name="to_order_address" />
