@@ -249,7 +249,8 @@ class UpgradeData implements UpgradeDataInterface
                     'attribute_group_id' => $attributeGroupId,
                     'used_in_forms' => [
                         'customer_address_edit',
-                        'customer_register_address'
+                        'customer_register_address',
+                        'adminhtml_customer_address'
                     ]
                 ]);
             $attribute->save();
