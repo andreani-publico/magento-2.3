@@ -27,7 +27,7 @@ define([
                 }
             });
 
-            return true;
+            return !this.validationErrors.length;
         }
     };
 });
