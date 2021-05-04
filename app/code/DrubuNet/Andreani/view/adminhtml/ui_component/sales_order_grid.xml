@@ -7,7 +7,9 @@
                     <item name="config" xsi:type="array">
                         <item name="type" xsi:type="string">order_imprimir_guias_andreani</item>
                         <item name="label" xsi:type="string" translate="true">Imprimir Guias Andreani</item>
-                        <item name="url" xsi:type="url" path="andreani/order/massImprimirGuias"/>
+                        <item name="url" xsi:type="url" path="andreani/order/operations">
+                            <param name="operation">mass_print_shipping_label</param>
+                        </item>
                     </item>
                 </argument>
             </action>

@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
     <argument name="data" xsi:type="array">
         <item name="js_config" xsi:type="array">
-            <item name="provider" xsi:type="string">andreani_sales_order_grid.andreani_sales_order_grid_data_source</item>
+            <item name="provider" xsi:type="string">andreani_sales_order_grid.andreani_sales_order_grid_data_source
+            </item>
             <item name="deps" xsi:type="string">andreani_sales_order_grid.andreani_sales_order_grid_data_source</item>
         </item>
         <item name="spinner" xsi:type="string">sales_order_columns</item>
     </argument>
     <dataSource name="andreani_sales_order_grid_data_source">
         <argument name="dataProvider" xsi:type="configurableObject">
-            <argument name="class" xsi:type="string">Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider</argument>
+            <argument name="class" xsi:type="string">DrubuNet\Andreani\Ui\DataProvider\Listing\OrderDataProvider</argument>
             <argument name="name" xsi:type="string">andreani_sales_order_grid_data_source</argument>
             <argument name="primaryFieldName" xsi:type="string">entity_id</argument>
             <argument name="requestFieldName" xsi:type="string">id</argument>
@@ -34,13 +36,16 @@
         <filters name="listing_filters">
             <filterSelect name="store_id">
                 <argument name="optionsProvider" xsi:type="configurableObject">
-                    <argument name="class" xsi:type="string">Magento\Store\Ui\Component\Listing\Column\Store\Options</argument>
+                    <argument name="class" xsi:type="string">Magento\Store\Ui\Component\Listing\Column\Store\Options
+                    </argument>
                 </argument>
                 <argument name="data" xsi:type="array">
                     <item name="config" xsi:type="array">
                         <item name="provider" xsi:type="string">${ $.parentName }</item>
                         <item name="imports" xsi:type="array">
-                            <item name="visible" xsi:type="string">ns = ${ $.ns }, componentType = column, index = ${ $.index }:visible</item>
+                            <item name="visible" xsi:type="string">ns = ${ $.ns }, componentType = column, index =
+                                ${ $.index }:visible
+                            </item>
                         </item>
                         <item name="caption" xsi:type="string" translate="true">All Store Views</item>
                         <item name="dataScope" xsi:type="string">store_id</item>
@@ -50,12 +55,14 @@
             </filterSelect>
         </filters>
         <massaction name="listing_massaction">
-            <action name="imprimir_guias_andreani">
+            <action name="andreani_generate_shipping">
                 <argument name="data" xsi:type="array">
                     <item name="config" xsi:type="array">
-                        <item name="type" xsi:type="string">imprimir_guias_andreani</item>
-                        <item name="label" xsi:type="string" translate="true">Generar guías</item>
-                        <item name="url" xsi:type="url" path="andreani/order_shipment/massImprimirGuiasAndreani"/>
+                        <item name="type" xsi:type="string">andreani_generate_shipping</item>
+                        <item name="label" xsi:type="string" translate="true">Crear envio en Andreani</item>
+                        <item name="url" xsi:type="url" path="andreani/order/operations">
+                            <param name="operation">mass_generate_shipping</param>
+                        </item>
                     </item>
                 </argument>
             </action>
@@ -67,7 +74,9 @@
             <item name="config" xsi:type="array">
                 <item name="childDefaults" xsi:type="array">
                     <item name="fieldAction" xsi:type="array">
-                        <item name="provider" xsi:type="string">andreani_sales_order_grid.andreani_sales_order_grid.sales_order_columns.actions</item>
+                        <item name="provider" xsi:type="string">
+                            andreani_sales_order_grid.andreani_sales_order_grid.sales_order_columns.actions
+                        </item>
                         <item name="target" xsi:type="string">applyAction</item>
                         <item name="params" xsi:type="array">
                             <item name="0" xsi:type="string">view</item>

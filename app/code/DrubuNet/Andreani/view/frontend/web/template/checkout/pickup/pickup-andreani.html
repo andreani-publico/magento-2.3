@@ -1,0 +1,38 @@
+<!--
+  ~ @author Drubu Team
+  ~ @copyright Copyright (c) 2021 Drubu
+  ~ @package DrubuNet_Andreani
+  -->
+
+<div class="andreanisucursal-container" data-bind="visible: selectedMethod() == 'andreanisucursal_sucursal'">
+    <div class="andreanisucursal-province-section" data-bind="visible: showProvinceSection()">
+        <select id="andreanisucursal-province-list" data-bind="options: provinces(),
+                                            value: selectedProvince,
+                                            optionsValue: function(item){return item;},
+                                            optionsCaption: 'Seleccione una provincia',
+                                            event:{ change: provinceChange},
+                                            optionsText: function(item){return item;}">
+        </select>
+    </div>
+    <div class="andreanisucursal-city-section" data-bind="visible: showCitySection()">
+        <select id="andreanisucursal-city-list" data-bind="options: cities(),
+                                            value: selectedCity,
+                                            optionsValue: function(item){return item;},
+                                            optionsCaption: 'Seleccione una localidad',
+                                            event:{ change: cityChange},
+                                            optionsText: function(item){return item;}">
+        </select>
+    </div>
+    <div class="andreanisucursal-store-section" data-bind="visible: showStoreSection()">
+        <select id="andreanisucursal-store-list" data-bind="options: stores(),
+                                            value: selectedStore,
+                                            optionsValue: function(item){return item;},
+                                            optionsCaption: 'Seleccione una sucursal',
+                                            event:{ change: storeChange},
+                                            optionsText: function(item){return item;}">
+        </select>
+    </div>
+    <div id="andreanisucursal-errors">
+        <span data-bind="text: andreaniErrorMessage"></span>
+    </div>
+</div>
