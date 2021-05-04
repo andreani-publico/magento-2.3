@@ -1,13 +1,10 @@
 <?xml version="1.0"?>
 <!--
-/**
-* Configuracion de rutas para los controladores
-*
-* @category    DrubuNet
-* @package     drubunet_andreani
-* @author      Drubu Team
-*/
--->
+  ~ @author Drubu Team
+  ~ @copyright Copyright (c) 2021 Drubu
+  ~ @package DrubuNet_Andreani
+  -->
+
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../lib/internal/Magento/Framework/App/etc/routes.xsd">
     <router id="standard">
         <route id="andreani" frontName="andreani">
