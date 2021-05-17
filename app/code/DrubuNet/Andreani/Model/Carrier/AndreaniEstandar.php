@@ -81,6 +81,7 @@ class AndreaniEstandar extends AbstractCarrierOnline implements CarrierInterface
     protected $_result;
 
     protected $orderFactory;
+    
     /**
      * @var \DrubuNet\Andreani\Model\Soap\Webservice
      */
@@ -429,7 +430,7 @@ class AndreaniEstandar extends AbstractCarrierOnline implements CarrierInterface
             $dataGuia["lastrequest"] = $dataGuiaAux->lastrequest;
         }
         if (!$dataGuia) {
-            $dataGuia = $webservice->GenerarEnviosDeEntregaYRetiroConDatosDeImpresion($carrierParams, $this->_code);          
+            $dataGuia = $this->soapService->GenerarEnviosDeEntregaYRetiroConDatosDeImpresion($carrierParams, $this->_code);          
         }
         $response = [];
 
