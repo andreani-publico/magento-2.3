@@ -117,18 +117,14 @@ class PickupDelivery extends AbstractCarrier implements CarrierInterface
     private function getShippingPrice(RateRequest $request)
     {
         $shippingPrice = false;
-
-        if(!$request->getFreeShipping()) {
-            $this->_isFixed = $this->getConfigData('use_fixed_price');
-            if ($this->_isFixed) {
-                $shippingPrice = $this->getConfigData('price');
-            } else {
-                if($this->checkoutSession->getCotizacionAndreaniSucursal()) {
-                    $shippingPrice = $this->checkoutSession->getCotizacionAndreaniSucursal();
-                }
-                else{
-                    $shippingPrice = 0;
-                }
+        $this->checkoutSession->setFreeShipping($request->getFreeShipping());
+        if(!$request->getFreeShipping()){
+            if($this->checkoutSession->getCotizacionAndreaniSucursal()) {
+                $shippingPrice = $this->checkoutSession->getCotizacionAndreaniSucursal();
+            }
+            else{
+                $shippingPrice = 0;
+                $this->checkoutSession->setAndreaniPickupRateWithoutTax(0);
             }
             $shippingPrice = $this->getFinalPriceWithHandlingFee($shippingPrice);
         }

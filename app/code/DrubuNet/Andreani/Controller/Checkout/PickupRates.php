@@ -16,7 +16,7 @@ use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\App\CsrfAwareActionInterface;
 
-class PickupRates implements ActionInterface,CsrfAwareActionInterface
+class PickupRates implements ActionInterface, CsrfAwareActionInterface
 {
     /**
      * @var ResultFactory
@@ -26,7 +26,7 @@ class PickupRates implements ActionInterface,CsrfAwareActionInterface
     /**
      * @var RequestInterface
      */
-    private  $request;
+    private $request;
 
     /**
      * @var CheckoutSession
@@ -66,26 +66,26 @@ class PickupRates implements ActionInterface,CsrfAwareActionInterface
      */
     public function execute()
     {
-        $request    = $this->request;
-        $price = 0;
+        $request = $this->request;
         $status = true;
-        if(!$this->checkoutSession->getFreeShipping()) {
-            $storeId = $request->getParam('store_id') ? $request->getParam('store_id') : null;
-            $storeZip = $request->getParam('store_zip') ? $request->getParam('store_zip') : null;
-            $storeName = $request->getParam('store_name') ? $request->getParam('store_name') : null;
+        $storeId = $request->getParam('store_id') ? $request->getParam('store_id') : null;
+        $addressZip = $request->getParam('address_zip') ? $request->getParam('address_zip') : null;
+        $storeName = $request->getParam('store_name') ? $request->getParam('store_name') : null;
+        $rate = $this->shippingProcessor->getRate($this->checkoutSession->getQuote()->getAllItems(), $addressZip, \DrubuNet\Andreani\Model\Carrier\PickupDelivery::CARRIER_CODE, $storeId);
 
-            $rate = $this->shippingProcessor->getRate($this->checkoutSession->getQuote()->getAllItems(), $storeZip, $storeId);
-
+        if ($this->checkoutSession->getFreeShipping()) {
+            $price = 0;
+        } else {
             $price = $rate->getPrice();
-            $status = $rate->getStatus();
-            if($status){
-                $quote = $this->quoteRepository->getActive($this->checkoutSession->getQuoteId());
-                $quote->setCodigoSucursalAndreani($storeId);
-                $this->quoteRepository->save($quote);
-
-                $this->checkoutSession->setNombreAndreaniSucursal($storeName);
-                $this->checkoutSession->setCotizacionAndreaniSucursal($price);
-            }
+        }
+        $status = $rate->getStatus();
+        if ($status) {
+            $quote = $this->quoteRepository->getActive($this->checkoutSession->getQuoteId());
+            $quote->setCodigoSucursalAndreani($storeId);
+            $this->quoteRepository->save($quote);
+            $this->checkoutSession->setAndreaniPickupRateWithoutTax($rate->getPriceWithoutTax());
+            $this->checkoutSession->setNombreAndreaniSucursal($storeName);
+            $this->checkoutSession->setCotizacionAndreaniSucursal($rate->getPrice());
         }
         $jsonResponse = $this->resultFactory->create(\Magento\Framework\Controller\ResultFactory::TYPE_JSON);
         $jsonResponse->setData(['price' => $price, 'status' => $status]);
@@ -93,7 +93,7 @@ class PickupRates implements ActionInterface,CsrfAwareActionInterface
         return $jsonResponse;
     }
 
-    public function validateForCsrf(RequestInterface $request): ?bool
+    public function validateForCsrf(RequestInterface $request): ? bool
     {
         return true;
     }

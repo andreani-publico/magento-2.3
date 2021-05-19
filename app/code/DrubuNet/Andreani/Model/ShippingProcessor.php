@@ -73,18 +73,20 @@ class ShippingProcessor
     /**
      * @param $items
      * @param $zip
+     * @param $method
      * @param string $store_id
      * @return DataObject
      */
-    public function getRate($items, $zip, $store_id = ''){
+    public function getRate($items, $zip, $method, $store_id = ''){
         $rate = new DataObject();
         $price = -1;
+        $priceWithoutTax = -1;
         $status = false;
         $packageWeight = $this->getPackageWeightByItems($items); //pesoTotal, valorDeclarado y volumen
         if(true /*$this->andreaniHelper->getTipoCotizacion() == $this->andreaniHelper::COTIZACION_ONLINE*/) {
             $params = array(
                 "cpDestino" => $zip,//CP de la sucursal, viene en la info
-                "contrato" => $this->andreaniHelper->getContractByType(\DrubuNet\Andreani\Model\Carrier\PickupDelivery::CARRIER_CODE),//nro contrato, config,
+                "contrato" => $this->andreaniHelper->getContractByType($method),//nro contrato, config,
                 "cliente" => $this->andreaniHelper->getClientNumber(),//Codigo cliente, config,
                 "sucursalOrigen" => $store_id,//Codigo sucursal
                 "bultos" => [
@@ -98,10 +100,18 @@ class ShippingProcessor
 
             $paramsObj = new DataObject();
             $paramsObj->setData($params);
-
             $ratesResult = $this->andreaniApiService->getRates($paramsObj);
+            if($this->andreaniHelper->isDebugEnable()){
+                $statusMsge = isset($ratesResult["tarifaConIva"]["total"]) ? 'successful' : 'with errors';
+                $logMessage = "Method: getRate for $method\n";
+                $logMessage .= "Status: $statusMsge\n";
+                $logMessage .= "Request: " . json_encode($params) . "\n";
+                $logMessage .= "Response: " . json_encode($ratesResult) . "\n";
+                \DrubuNet\Andreani\Helper\Data::log($logMessage, 'andreani_rest_' . date('Y_m') . '.log');
+            }
             if(isset($ratesResult["tarifaConIva"]["total"])){
                 $price = $ratesResult["tarifaConIva"]["total"];
+                $priceWithoutTax = $ratesResult['tarifaSinIva']['total'];
                 $status = true;
             }
         }
@@ -121,13 +131,24 @@ class ShippingProcessor
 //        }
 
         $rate->setPrice($price);
+        $rate->setPriceWithoutTax($priceWithoutTax);
         $rate->setStatus($status);
 
         return $rate;
     }
 
     public function getLabel($tracking){
-        return $this->andreaniApiService->getLabel($tracking);
+        $label = null;
+        try{
+            $label = $this->andreaniApiService->getLabel($tracking);
+        }catch (\Exception $e){
+            $logMessage = "Method: getLabel\n";
+            $logMessage .= "Status: with errors\n";
+            $logMessage .= "Request: $tracking\n";
+            $logMessage .= "Message: " . $e->getMessage() . "\n";
+            \DrubuNet\Andreani\Helper\Data::log($logMessage, 'andreani_rest_' . date('Y_m') . '.log');
+        }
+        return $label;
     }
 
     /**
@@ -142,6 +163,8 @@ class ShippingProcessor
             $carrierCode = $order->getShippingMethod(true)->getCarrierCode();
             $packageWeight = $this->getPackageWeightByItems($order->getAllItems());
             if($order->hasShipments()){
+                $productFixedVolume = $this->andreaniHelper->getProductFixedVolume();
+                $productFixedPrice = $this->andreaniHelper->getProductFixedPrice();
                 $valorTotal = $pesoTotal = 0;
                 $itemsArray = [];
                 foreach ($order->getAllItems() AS $orderItem)
@@ -152,7 +175,14 @@ class ShippingProcessor
 
                     $qtyShipped = $orderItem->getQtyShipped();
 
-                    $valorTotal += $qtyShipped * $orderItem->getPrice();
+                    if($productFixedPrice == '') {
+                        $productPrice = $orderItem->getPrice();
+                    }
+                    else{
+                        $productPrice = $productFixedPrice;
+                    }
+
+                    $valorTotal += $qtyShipped * $productPrice;
                     $pesoTotal  += $qtyShipped * $orderItem->getWeight();
 
                     $itemsArray[$orderItem->getId()] = [
@@ -165,6 +195,11 @@ class ShippingProcessor
                         'order_item_id' => $orderItem->getId()
                     ];
                 }
+
+                if($this->andreaniHelper->getWeightUnit() == 'gramos'){
+                    $pesoTotal = $pesoTotal / 1000;
+                }
+
                 $packageWeight = [
                     'items' => $itemsArray,
                     'amount' => $valorTotal,
@@ -222,7 +257,7 @@ class ShippingProcessor
                             ]
                         ),
                     ],
-                    "productoAEntregar" => $packageWeight['names'],
+                    //"productoAEntregar" => $packageWeight['names'],
                     "bultos" => [
                         array(
                             "kilos" => $packageWeight['weight'],
@@ -230,13 +265,17 @@ class ShippingProcessor
                             //"altoCm" => 50,
                             //"anchoCm" => 10,
                             "volumenCm" => $packageWeight['volume'],
-                            //"valorDeclaradoSinImpuestos" => 1200,
+                            "valorDeclaradoSinImpuestos" => floatval($order->getAndreaniRateWithoutTax()),
                             //"valorDeclaradoConImpuestos" => 1452,
                             "referencias" => [
                                 array(
                                     "meta" => "idCliente",
                                     "contenido" => $order->getIncrementId()
-                                )
+                                ),
+                                array(
+                                    "meta" => "observaciones",
+                                    "contenido" => substr("PRODUCTOS A ENTREGAR: " . $packageWeight['names'],0,255)
+                                ),
                             ]
                         )
                     ]
@@ -247,7 +286,8 @@ class ShippingProcessor
                             "id" => $order->getCodigoSucursalAndreani(),
                         )
                     );
-                } else {
+                }
+                else {
                     $params['destino'] = array(
                         "postal" => array(
                             "codigoPostal" => $order->getShippingAddress()->getPostCode(),
@@ -256,18 +296,25 @@ class ShippingProcessor
                             "localidad" => $order->getShippingAddress()->getCity(),
                             "region" => $order->getShippingAddress()->getRegion(),
                             "pais" => "Argentina",
-                            "componentesDeDireccion" => [
-                                array(
-                                    "meta" => "piso",
-                                    "contenido" => $order->getShippingAddress()->getPiso() ? $order->getShippingAddress()->getPiso() : ''
-                                ),
-                                array(
-                                    "meta" => "departamento",
-                                    "contenido" => $order->getShippingAddress()->getDepartamento() ? $order->getShippingAddress()->getDepartamento() : ''
-                                )
-                            ]
+                            "componentesDeDireccion" => []
                         )
                     );
+                    if($order->getShippingAddress()->getPiso() != 0){
+                        $params['destino']['postal']['componentesDeDireccion'][] = array(
+                            "meta" => "piso",
+                            "contenido" => $order->getShippingAddress()->getPiso()
+                        );
+                    }
+                    if($order->getShippingAddress()->getDepartamento() != ''){
+                        $params['destino']['postal']['componentesDeDireccion'][] = array(
+                            "meta" => "departamento",
+                            "contenido" => $order->getShippingAddress()->getDepartamento()
+                        );
+                    }
+
+                    if(!empty($order->getShippingAddress()->getObservaciones())){
+                        $params['bultos'][0]['referencias'][1]['contenido'] = substr('NOTAS ADICIONALES DE DIRECCION: ' . $order->getShippingAddress()->getObservaciones() . ' ' .$params['bultos'][0]['referencias'][1]['contenido'],0,255);
+                    }
                 }
                 $componentesDeDireccion = array();
                 $pisoOrigenEnvio = $this->andreaniHelper->getOrigFloor();
@@ -398,6 +445,8 @@ class ShippingProcessor
      * @return array
      */
     private function getPackageWeightByItems($items){
+        $productFixedVolume = $this->andreaniHelper->getProductFixedVolume();
+        $productFixedPrice = $this->andreaniHelper->getProductFixedPrice();
         $pesoTotal       = 0;
         $volumenTotal    = 0;
         $valorProductos  = 0;
@@ -406,25 +455,38 @@ class ShippingProcessor
 
         foreach($items as $_item)
         {
-            if($_item->getProductType() != 'simple')
+            if($_item->getProductType() != 'simple') {
                 continue;
+            }
 
             $_producto = $_item->getProduct();
-            $productsNamesArray[] = $_producto->getName();
+            $productsNamesArray[] = $_producto->getSku() . ' - ' . $_producto->getName();
 
             if($_item->getParentItem())
                 $_item = $_item->getParentItem();
 
             if($_item instanceof \Magento\Sales\Model\Order\Item) {
-                $volumenTotal += (int)$_producto->getResource()
-                        ->getAttributeRawValue($_producto->getId(), 'volumen', $_producto->getStoreId()) * $_item->getQtyOrdered();
+                if($productFixedVolume == '') {
+                    $volumenTotal += (int)$_producto->getResource()
+                            ->getAttributeRawValue($_producto->getId(), 'volumen', $_producto->getStoreId()) * $_item->getQtyOrdered();
+                }
+                else{
+                    $volumenTotal += intval($productFixedVolume) * $_item->getQtyOrdered();
+                }
 
                 $pesoTotal += $_item->getQtyOrdered() * $_item->getWeight();
 
-                if ($_producto->getCost())
-                    $valorProductos += $_producto->getCost() * $_item->getQtyOrdered();
-                else
-                    $valorProductos += $_item->getPrice() * $_item->getQtyOrdered();
+                if($productFixedPrice == '') {
+                    if ($_producto->getCost()) {
+                        $valorProductos += $_producto->getCost() * $_item->getQtyOrdered();
+                    }
+                    else {
+                        $valorProductos += $_item->getPrice() * $_item->getQtyOrdered();
+                    }
+                }
+                else{
+                    $valorProductos += intval($productFixedPrice) * $_item->getQtyOrdered();
+                }
 
                 $itemsArray[$_item->getId()] = [
                     'qty' => $_item->getQtyToShip(),
@@ -437,18 +499,33 @@ class ShippingProcessor
                 ];
             }
             else{
-                $volumenTotal += (int)$_producto->getResource()
-                        ->getAttributeRawValue($_producto->getId(), 'volumen', $_producto->getStoreId()) * $_item->getQty();
+                if($productFixedVolume == '') {
+                    $volumenTotal += (int)$_producto->getResource()
+                            ->getAttributeRawValue($_producto->getId(), 'volumen', $_producto->getStoreId()) * $_item->getQty();
+                }
+                else{
+                    $volumenTotal += intval($productFixedVolume) * $_item->getQty();
+                }
 
                 $pesoTotal += $_item->getQty() * $_item->getWeight();
 
-                if ($_producto->getCost())
-                    $valorProductos += $_producto->getCost() * $_item->getQty();
-                else
-                    $valorProductos += $_item->getPrice() * $_item->getQty();
+                if($productFixedPrice == '') {
+                    if ($_producto->getCost()) {
+                        $valorProductos += $_producto->getCost() * $_item->getQty();
+                    }
+                    else {
+                        $valorProductos += $_item->getPrice() * $_item->getQty();
+                    }
+                }
+                else{
+                    $valorProductos += intval($productFixedPrice) * $_item->getQty();
+                }
             }
         }
-        //$pesoTotal = $pesoTotal * 1000; parece que viaja en kgs
+
+        if($this->andreaniHelper->getWeightUnit() == 'gramos'){
+            $pesoTotal = $pesoTotal / 1000;
+        }
 
         return array(
             'amount' => $valorProductos,

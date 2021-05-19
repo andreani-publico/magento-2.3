@@ -1,10 +1,3 @@
-
-/*
- * @author Drubu Team
- * @copyright Copyright (c) 2021 Drubu
- * @package DrubuNet_Andreani
- */
-
 /**
  * @author Drubu Team
  * @copyright Copyright (c) 2021 Drubu
@@ -14,6 +7,9 @@
 var config = {
     config: {
         mixins: {
+            'Magento_Checkout/js/view/shipping': {
+                'DrubuNet_Andreani/js/view/shipping': true
+            },
             'Magento_Checkout/js/action/set-shipping-information': {
                 'DrubuNet_Andreani/js/action/set-shipping-information-mixin': true
             },

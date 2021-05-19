@@ -26,13 +26,15 @@ class ConfigProvider implements ConfigProviderInterface
     public function getConfig(){
         $stores = $this->apiService->getLocations();
         $result = [];
-        foreach ($stores as $store){
-            $storeName = $store["direccion"]['calle'] . ' ' . $store["direccion"]['numero'] . ', CP: ' . $store["direccion"]['codigoPostal'];
-            if($store['direccion']['localidad'] == 'C.A.B.A.'){
-                $result[$store['direccion']['localidad']][ucwords(strtolower($store['descripcion']))][$storeName] = $store;
-            }
-            else {
-                $result[$store['direccion']['provincia']][$store['direccion']['localidad']][$storeName] = $store;
+        if (is_array($stores)){
+            foreach ($stores as $store){
+                $storeName = $store["direccion"]['calle'] . ' ' . $store["direccion"]['numero'] . ', CP: ' . $store["direccion"]['codigoPostal'];
+                if($store['direccion']['localidad'] == 'C.A.B.A.'){
+                    $result[$store['direccion']['localidad']][ucwords(strtolower($store['descripcion']))][$storeName] = $store;
+                }
+                else {
+                    $result[$store['direccion']['provincia']][$store['direccion']['localidad']][$storeName] = $store;
+                }
             }
         }
         return [

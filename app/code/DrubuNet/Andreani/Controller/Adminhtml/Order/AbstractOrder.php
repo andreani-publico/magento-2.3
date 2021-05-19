@@ -27,7 +27,7 @@ abstract class AbstractOrder extends Action
      */
     protected function initPage($resultPage)
     {
-        $resultPage->setActiveMenu('DrubuNet_Andreani::shipping_operations_list');
+        $resultPage->setActiveMenu('DrubuNet_Andreani::shipping_operations');
 
         return $resultPage;
     }

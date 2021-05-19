@@ -26,7 +26,9 @@ class BillingAddressManagement
                 $address->setCelular($extAttributes->getCelular());
                 $address->setObservaciones($extAttributes->getObservaciones());
             } catch (\Exception $e) {
-                \DrubuNet\Andreani\Helper\Data::log('Error in BillingAddressManagement ' . $e->getMessage(),'andreani_attributes.log');
+                $logMessage = "Method: BillingAddressManagement::beforeAssign\n";
+                $logMessage .= "Message: " . $e->getMessage() . "\n";
+                \DrubuNet\Andreani\Helper\Data::log($logMessage, 'andreani_attribute_errors_' . date('Y_m') . '.log');
             }
         }
     }

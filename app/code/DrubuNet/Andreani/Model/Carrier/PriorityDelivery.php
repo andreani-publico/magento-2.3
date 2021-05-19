@@ -8,6 +8,7 @@
 namespace DrubuNet\Andreani\Model\Carrier;
 
 use DrubuNet\Andreani\Model\ShippingProcessor;
+use Magento\Checkout\Model\Session;
 use Magento\Framework\DataObject;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use Magento\Shipping\Model\Carrier\AbstractCarrier;
@@ -48,6 +49,11 @@ class PriorityDelivery extends AbstractCarrier implements CarrierInterface
     protected $andreaniHelper;
 
     /**
+     * @var Session
+     */
+    protected $checkoutSession;
+
+    /**
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
      * @param \Magento\Quote\Model\Quote\Address\RateResult\ErrorFactory $rateErrorFactory
      * @param \Psr\Log\LoggerInterface $logger
@@ -64,12 +70,14 @@ class PriorityDelivery extends AbstractCarrier implements CarrierInterface
         \Magento\Quote\Model\Quote\Address\RateResult\MethodFactory $rateMethodFactory,
         \DrubuNet\Andreani\Model\ShippingProcessor $shippingProcessor,
         \DrubuNet\Andreani\Helper\Data $andreaniHelper,
+        Session $checkoutSession,
         array $data = []
     ) {
         $this->_rateResultFactory = $rateResultFactory;
         $this->_rateMethodFactory = $rateMethodFactory;
         $this->shippingProcessor = $shippingProcessor;
         $this->andreaniHelper = $andreaniHelper;
+        $this->checkoutSession = $checkoutSession;
         parent::__construct($scopeConfig, $rateErrorFactory, $logger, $data);
     }
 
@@ -119,16 +127,11 @@ class PriorityDelivery extends AbstractCarrier implements CarrierInterface
     private function getShippingPrice(RateRequest $request)
     {
         $shippingPrice = false;
-
+        $rate = $this->shippingProcessor->getRate($request->getAllItems(), $request->getDestPostcode(), \DrubuNet\Andreani\Model\Carrier\PriorityDelivery::CARRIER_CODE);
         if(!$request->getFreeShipping()) {
-            $this->_isFixed = $this->getConfigData('use_fixed_price');
-            if ($this->_isFixed) {
-                $shippingPrice = $this->getConfigData('price');
-            } else {
-                $rate = $this->shippingProcessor->getRate($request->getAllItems(), $request->getDestPostcode());
-                if($rate->getStatus()){
-                    $shippingPrice = $rate->getPrice();
-                }
+            if($rate->getStatus()){
+                $shippingPrice = $rate->getPrice();
+                $this->checkoutSession->setAndreaniPriorityRateWithoutTax($rate->getPriceWithoutTax());
             }
             if(!is_bool($shippingPrice)) {
                 $shippingPrice = $this->getFinalPriceWithHandlingFee($shippingPrice);
@@ -136,6 +139,9 @@ class PriorityDelivery extends AbstractCarrier implements CarrierInterface
         }
         else{
             $shippingPrice = 0;
+            if($rate->getStatus()){
+                $this->checkoutSession->setAndreaniPriorityRateWithoutTax($rate->getPriceWithoutTax());
+            }
         }
 
         return $shippingPrice;

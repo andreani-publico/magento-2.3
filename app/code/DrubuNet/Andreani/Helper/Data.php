@@ -5,17 +5,6 @@ namespace DrubuNet\Andreani\Helper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\App\Helper\AbstractHelper;
 
-/*use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Checkout\Model\Session;
-use Magento\Checkout\Model\Cart;
-use Magento\Framework\App\Filesystem\DirectoryList;
-use Magento\Store\Model\StoreManagerInterface;
-use Magento\Catalog\Model\ProductFactory;
-use Magento\Sales\Model\Order;
-use Magento\Sales\Model\Order\Shipment;
-use Spipu\Html2Pdf\Html2Pdf as Html2Pdf;
-use Spipu\Html2Pdf\Exception\Html2PdfException as Html2PdfException;*/
-
 class Data extends AbstractHelper
 {
     /**
@@ -59,6 +48,18 @@ class Data extends AbstractHelper
 
     public function getClientNumber(){
         return $this->getConfig(self::SHIPPING_SECTION . 'client_number');
+    }
+
+    public function getWeightUnit(){
+        return $this->getConfig(self::SHIPPING_SECTION . 'weight_unit');
+    }
+
+    public function getProductFixedPrice(){
+        return $this->getConfig(self::SHIPPING_SECTION . 'product_fixed_price');
+    }
+
+    public function getProductFixedVolume(){
+        return $this->getConfig(self::SHIPPING_SECTION . 'product_fixed_volume');
     }
 
     public function isProductionMode(){
