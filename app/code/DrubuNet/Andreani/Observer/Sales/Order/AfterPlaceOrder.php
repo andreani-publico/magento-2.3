@@ -85,13 +85,6 @@ class AfterPlaceOrder implements ObserverInterface
         if($order->getShippingMethod() == \DrubuNet\Andreani\Model\Carrier\PickupDelivery::CARRIER_CODE . '_' . \DrubuNet\Andreani\Model\Carrier\PickupDelivery::METHOD_CODE) {
             $order->setCodigoSucursalAndreani($quote->getCodigoSucursalAndreani());
             $order->setShippingDescription($order->getShippingDescription() . ' - ' . $this->checkoutSession->getNombreAndreaniSucursal());
-            $order->setAndreaniRateWithoutTax($this->checkoutSession->getAndreaniPickupRateWithoutTax());
-        }
-        elseif($order->getShippingMethod() == \DrubuNet\Andreani\Model\Carrier\StandardDelivery::CARRIER_CODE . '_' . \DrubuNet\Andreani\Model\Carrier\StandardDelivery::METHOD_CODE){
-            $order->setAndreaniRateWithoutTax($this->checkoutSession->getAndreaniStandardRateWithoutTax());
-        }
-        elseif($order->getShippingMethod() == \DrubuNet\Andreani\Model\Carrier\PriorityDelivery::CARRIER_CODE . '_' . \DrubuNet\Andreani\Model\Carrier\PriorityDelivery::METHOD_CODE){
-            $order->setAndreaniRateWithoutTax($this->checkoutSession->getAndreaniPriorityRateWithoutTax());
         }
 
         $this->orderRepository->save($order);
@@ -126,9 +119,6 @@ class AfterPlaceOrder implements ObserverInterface
 
         $this->checkoutSession->unsCotizacionAndreaniSucursal();
         $this->checkoutSession->unsNombreAndreaniSucursal();
-        $this->checkoutSession->unsAndreaniPickupRateWithoutTax();
-        $this->checkoutSession->unsAndreaniStandardRateWithoutTax();
-        $this->checkoutSession->unsAndreaniPriorityRateWithoutTax();
 
         return $this;
     }

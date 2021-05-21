@@ -80,7 +80,6 @@ class ShippingProcessor
     public function getRate($items, $zip, $method, $store_id = ''){
         $rate = new DataObject();
         $price = -1;
-        $priceWithoutTax = -1;
         $status = false;
         $packageWeight = $this->getPackageWeightByItems($items); //pesoTotal, valorDeclarado y volumen
         if(true /*$this->andreaniHelper->getTipoCotizacion() == $this->andreaniHelper::COTIZACION_ONLINE*/) {
@@ -111,7 +110,6 @@ class ShippingProcessor
             }
             if(isset($ratesResult["tarifaConIva"]["total"])){
                 $price = $ratesResult["tarifaConIva"]["total"];
-                $priceWithoutTax = $ratesResult['tarifaSinIva']['total'];
                 $status = true;
             }
         }
@@ -131,7 +129,6 @@ class ShippingProcessor
 //        }
 
         $rate->setPrice($price);
-        $rate->setPriceWithoutTax($priceWithoutTax);
         $rate->setStatus($status);
 
         return $rate;
@@ -265,7 +262,7 @@ class ShippingProcessor
                             //"altoCm" => 50,
                             //"anchoCm" => 10,
                             "volumenCm" => $packageWeight['volume'],
-                            "valorDeclaradoSinImpuestos" => floatval($order->getAndreaniRateWithoutTax()),
+                            "valorDeclaradoSinImpuestos" => floatval($packageWeight['amount']),
                             //"valorDeclaradoConImpuestos" => 1452,
                             "referencias" => [
                                 array(
@@ -274,7 +271,7 @@ class ShippingProcessor
                                 ),
                                 array(
                                     "meta" => "observaciones",
-                                    "contenido" => substr("PRODUCTOS A ENTREGAR: " . $packageWeight['names'],0,255)
+                                    "contenido" => substr($packageWeight['names'],0,255)
                                 ),
                             ]
                         )
@@ -313,7 +310,7 @@ class ShippingProcessor
                     }
 
                     if(!empty($order->getShippingAddress()->getObservaciones())){
-                        $params['bultos'][0]['referencias'][1]['contenido'] = substr('NOTAS ADICIONALES DE DIRECCION: ' . $order->getShippingAddress()->getObservaciones() . ' ' .$params['bultos'][0]['referencias'][1]['contenido'],0,255);
+                        $params['bultos'][0]['referencias'][1]['contenido'] = substr($order->getShippingAddress()->getObservaciones() . ' ' .$params['bultos'][0]['referencias'][1]['contenido'],0,255);
                     }
                 }
                 $componentesDeDireccion = array();

@@ -104,38 +104,6 @@ class AndreaniApiService
         ],Request::HTTP_METHOD_GET, false));
     }
 
-    public function getOrderLabel($tracking){
-        $url = str_replace('{numeroAndreani}',$tracking,$this->helper->getLabelUrl());
-        if(empty($this->token)){
-            $this->login();
-        }
-        $header['code'] = "x-authorization-token";
-        $header['value'] = $this->token;
-        $method = \Zend_Http_Client::GET;
-        $params = null;
-        /**
-         * @var \Magento\Framework\HTTP\ZendClient $client
-         */
-        $client = ObjectManager::getInstance()->create('\Magento\Framework\HTTP\ZendClientFactory')->create();
-        $client->setUri($url);
-        $client->setMethod($method);
-        $client->setHeaders(\Zend_Http_Client::CONTENT_TYPE, 'application/json');
-        $client->setHeaders('Accept','application/json');
-        if(!is_null($header)) {
-            $client->setHeaders($header['code'], $header['value']);
-        }
-        if(!is_null($params)) {
-            if($method === \Zend_Http_Client::GET) {
-                $client->setParameterGet($params); //json
-            }
-            else if ($method === \Zend_Http_Client::POST){
-                $client->setRawData($params);
-            }
-        }
-
-        return $client->request()->getBody();
-    }
-
     /**
      * @param DataObject $data
      * @return DataObject

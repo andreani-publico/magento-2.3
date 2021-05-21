@@ -124,7 +124,6 @@ class PickupDelivery extends AbstractCarrier implements CarrierInterface
             }
             else{
                 $shippingPrice = 0;
-                $this->checkoutSession->setAndreaniPickupRateWithoutTax(0);
             }
             $shippingPrice = $this->getFinalPriceWithHandlingFee($shippingPrice);
         }

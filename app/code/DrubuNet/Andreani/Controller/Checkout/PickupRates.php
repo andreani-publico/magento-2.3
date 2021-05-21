@@ -83,7 +83,6 @@ class PickupRates implements ActionInterface, CsrfAwareActionInterface
             $quote = $this->quoteRepository->getActive($this->checkoutSession->getQuoteId());
             $quote->setCodigoSucursalAndreani($storeId);
             $this->quoteRepository->save($quote);
-            $this->checkoutSession->setAndreaniPickupRateWithoutTax($rate->getPriceWithoutTax());
             $this->checkoutSession->setNombreAndreaniSucursal($storeName);
             $this->checkoutSession->setCotizacionAndreaniSucursal($rate->getPrice());
         }

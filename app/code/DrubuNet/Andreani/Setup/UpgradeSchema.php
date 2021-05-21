@@ -23,10 +23,6 @@ class UpgradeSchema implements UpgradeSchemaInterface
         if(version_compare($context->getVersion(), '2.0.0', '<')) {
             $this->upgradeTo200($setup);
         }
-        if(version_compare($context->getVersion(), '2.0.1', '<')) {
-            $this->upgradeTo201($setup);
-        }
-
         $setup->endSetup();
     }
 
@@ -119,27 +115,6 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 'type' => Table::TYPE_INTEGER,
                 'nullable' => true,
                 'comment' => 'Codigo de sucursal andreani',
-                'default' => null
-            ]);
-        }
-    }
-
-    private function upgradeTo201(SchemaSetupInterface $setup){
-        if(!$setup->getConnection()->tableColumnExists('quote','andreani_rate_without_tax')) {
-            $setup->getConnection()->addColumn('quote', 'andreani_rate_without_tax', [
-                'type' => Table::TYPE_TEXT,
-                'nullable' => true,
-                'length' => 255,
-                'comment' => 'Mappeo para valorDeclaradoSinImpuestos',
-                'default' => null
-            ]);
-        }
-        if(!$setup->getConnection()->tableColumnExists('sales_order','andreani_rate_without_tax')) {
-            $setup->getConnection()->addColumn('sales_order', 'andreani_rate_without_tax', [
-                'type' => Table::TYPE_TEXT,
-                'nullable' => true,
-                'length' => 10,
-                'comment' => 'Mappeo para valorDeclaradoSinImpuestos',
                 'default' => null
             ]);
         }
