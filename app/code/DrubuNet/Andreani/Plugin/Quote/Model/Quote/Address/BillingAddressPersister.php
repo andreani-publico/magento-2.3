@@ -4,6 +4,7 @@
  * @copyright Copyright (c) 2021 Drubu
  * @package DrubuNet_Andreani
  */
+
 namespace DrubuNet\Andreani\Plugin\Quote\Model\Quote\Address;
 
 class BillingAddressPersister
@@ -25,7 +26,9 @@ class BillingAddressPersister
                 $address->setCelular($extAttributes->getCelular());
                 $address->setObservaciones($extAttributes->getObservaciones());
             } catch (\Exception $e) {
-                \DrubuNet\Andreani\Helper\Data::log('Error in BillingAddressPersister ' . $e->getMessage(),'andreani_attributes.log');
+                $logMessage = "Method: BillingAddressPersister::beforeSave\n";
+                $logMessage .= "Message: " . $e->getMessage() . "\n";
+                \DrubuNet\Andreani\Helper\Data::log($logMessage, 'andreani_attribute_errors_' . date('Y_m') . '.log');
             }
         }
     }

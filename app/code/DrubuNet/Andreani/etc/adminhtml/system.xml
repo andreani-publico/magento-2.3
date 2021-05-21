@@ -11,17 +11,6 @@
                 <field id="name" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
                     <label>Method Name</label>
                 </field>
-                <field id="use_fixed_price" translate="label" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" canRestore="1">
-                    <label>Use fixed price</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                </field>
-                <field id="price" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" canRestore="1">
-                    <label>Price</label>
-                    <validate>validate-number validate-zero-or-greater</validate>
-                    <depends>
-                        <field id="use_fixed_price">1</field>
-                    </depends>
-                </field>
                 <field id="sort_order" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1">
                     <label>Sort Order</label>
                     <validate>validate-number validate-zero-or-greater</validate>
@@ -67,17 +56,6 @@
                 <field id="name" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
                     <label>Method Name</label>
                 </field>
-                <field id="use_fixed_price" translate="label" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" canRestore="1">
-                    <label>Use fixed price</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                </field>
-                <field id="price" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" canRestore="1">
-                    <label>Price</label>
-                    <validate>validate-number validate-zero-or-greater</validate>
-                    <depends>
-                        <field id="use_fixed_price">1</field>
-                    </depends>
-                </field>
                 <field id="sort_order" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1">
                     <label>Sort Order</label>
                     <validate>validate-number validate-zero-or-greater</validate>
@@ -122,17 +100,6 @@
                 </field>
                 <field id="name" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
                     <label>Method Name</label>
-                </field>
-                <field id="use_fixed_price" translate="label" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" canRestore="1">
-                    <label>Use fixed price</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                </field>
-                <field id="price" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" canRestore="1">
-                    <label>Price</label>
-                    <validate>validate-number validate-zero-or-greater</validate>
-                    <depends>
-                        <field id="use_fixed_price">1</field>
-                    </depends>
                 </field>
                 <field id="sort_order" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1">
                     <label>Sort Order</label>
@@ -190,6 +157,19 @@
                 </field>
                 <field id="client_number" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Número de cliente</label>
+                </field>
+                <field id="weight_unit" translate="label" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Unidad de medida de origen</label>
+                    <source_model>DrubuNet\Andreani\Model\Source\WeightUnit</source_model>
+                    <comment><![CDATA[Es la unidad de medida base de la tienda.]]></comment>
+                </field>
+                <field id="product_fixed_price" translate="label" type="text" sortOrder="8" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Precio fijo de productos</label>
+                    <comment><![CDATA[Dejar en blanco para que se calcule desde el precio del producto.]]></comment>
+                </field>
+                <field id="product_fixed_volume" translate="label" type="text" sortOrder="8" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Volumen fijo de productos</label>
+                    <comment><![CDATA[Dejar en blanco para que se calcule desde el volumen del producto. <br><strong>Importante: Para calcularlo desde el producto es necesario completar el atributo "volumen" para cada producto del sitio.</strong>]]></comment>
                 </field>
                 <field id="tracking_url" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Url para seguimiento de envíos</label>

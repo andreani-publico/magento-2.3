@@ -117,8 +117,8 @@ class AfterPlaceOrder implements ObserverInterface
             }
         }
 
-        $this->checkoutSession->unsetCotizacionAndreaniSucursal();
-        $this->checkoutSession->unsetNombreAndreaniSucursal();
+        $this->checkoutSession->unsCotizacionAndreaniSucursal();
+        $this->checkoutSession->unsNombreAndreaniSucursal();
 
         return $this;
     }

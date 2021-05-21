@@ -23,7 +23,6 @@ class UpgradeSchema implements UpgradeSchemaInterface
         if(version_compare($context->getVersion(), '2.0.0', '<')) {
             $this->upgradeTo200($setup);
         }
-
         $setup->endSetup();
     }
 

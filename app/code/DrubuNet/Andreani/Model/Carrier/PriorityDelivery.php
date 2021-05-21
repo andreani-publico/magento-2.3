@@ -119,16 +119,10 @@ class PriorityDelivery extends AbstractCarrier implements CarrierInterface
     private function getShippingPrice(RateRequest $request)
     {
         $shippingPrice = false;
-
         if(!$request->getFreeShipping()) {
-            $this->_isFixed = $this->getConfigData('use_fixed_price');
-            if ($this->_isFixed) {
-                $shippingPrice = $this->getConfigData('price');
-            } else {
-                $rate = $this->shippingProcessor->getRate($request->getAllItems(), $request->getDestPostcode());
-                if($rate->getStatus()){
-                    $shippingPrice = $rate->getPrice();
-                }
+            $rate = $this->shippingProcessor->getRate($request->getAllItems(), $request->getDestPostcode(), \DrubuNet\Andreani\Model\Carrier\PriorityDelivery::CARRIER_CODE);
+            if($rate->getStatus()){
+                $shippingPrice = $rate->getPrice();
             }
             if(!is_bool($shippingPrice)) {
                 $shippingPrice = $this->getFinalPriceWithHandlingFee($shippingPrice);

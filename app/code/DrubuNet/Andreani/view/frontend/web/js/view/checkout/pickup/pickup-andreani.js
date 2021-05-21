@@ -86,10 +86,10 @@ define([
                     dataType: 'json',
                     showLoader: true,
                     data: {
-                        store_id: checkoutConfig.andreani.stores[this.selectedProvince()][this.selectedCity()][this.selectedStore()].id,
-                        store_zip: checkoutConfig.andreani.stores[this.selectedProvince()][this.selectedCity()][this.selectedStore()].direccion.codigoPostal,
+                        store_id: checkoutConfig.andreani.stores[this.selectedProvince()][this.selectedCity()][this.selectedStore()].codigo,
                         store_name: this.selectedStore(),
-                        quote_id: quote.getQuoteId()
+                        quote_id: quote.getQuoteId(),
+                        address_zip: quote.shippingAddress().postcode
                     },
                     complete: function (response) {
                         if(response.status == 200 && response.responseJSON.status){
