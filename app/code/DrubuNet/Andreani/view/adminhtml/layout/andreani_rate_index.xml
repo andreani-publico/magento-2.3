@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!--
+  ~ @author Drubu Team
+  ~ @copyright Copyright (c) 2021 Drubu
+  ~ @package DrubuNet_Andreani
+  -->
+
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="content">
+            <uiComponent name="andreani_rate_form"/>
+        </referenceContainer>
+    </body>
+</page>

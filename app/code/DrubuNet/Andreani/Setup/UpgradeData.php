@@ -1,26 +1,31 @@
 <?php
+/**
+ * @author Drubu Team
+ * @copyright Copyright (c) 2021 Drubu
+ * @package DrubuNet_Andreani
+ */
 
 namespace DrubuNet\Andreani\Setup;
 
+use Magento\Customer\Setup\CustomerSetup;
+use Magento\Eav\Setup\EavSetup;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\UpgradeDataInterface;
 use Magento\Eav\Setup\EavSetupFactory;
 use Magento\Customer\Setup\CustomerSetupFactory;
 
-/**
- * Class UpgradeData
- *
- * @description Actualizador de datos para las tablas
- * @author Drubu Team
- * @package DrubuNet\Andreani\Setup
- */
 class UpgradeData implements UpgradeDataInterface
 {
     /**
      * @var EavSetupFactory
      */
     private $_eavSetupFactory;
+
+    /**
+     * @var CustomerSetupFactory
+     */
+    private $customerSetupFactory;
 
     /**
      * InstallData constructor.
@@ -32,13 +37,10 @@ class UpgradeData implements UpgradeDataInterface
         CustomerSetupFactory $customerSetupFactory
     ) {
         $this->_eavSetupFactory = $eavSetupFactory;
-
         $this->customerSetupFactory = $customerSetupFactory;
     }
 
     /**
-     * Upgrades data for a module
-     *
      * @param ModuleDataSetupInterface $setup
      * @param ModuleContextInterface $context
      * @return void
@@ -55,42 +57,25 @@ class UpgradeData implements UpgradeDataInterface
             $eavSetup->updateAttribute(\Magento\Catalog\Model\Product::ENTITY,'volumen','apply_to','simple');
         }
 
-        if (version_compare($context->getVersion(), '1.0.3', '<'))
+        if (version_compare($context->getVersion(), '2.0.0', '<'))
         {
-            //$eavSetup->updateAttribute(\Magento\Customer\Api\AddressMetadataInterface::ENTITY_TYPE_ADDRESS,'dni','validate_rules','{"max_text_length":15,"min_text_length":7}');
-            //$eavSetup->updateAttribute(\Magento\Customer\Api\AddressMetadataInterface::ENTITY_TYPE_ADDRESS,'celular','validate_rules','{"max_text_length":20}');
-            //$eavSetup->updateAttribute(\Magento\Customer\Api\AddressMetadataInterface::ENTITY_TYPE_ADDRESS,'altura','validate_rules','{"min_text_length":1}');
-            $this->deleteOldFields($eavSetup,$setup);
-            $this->addNewFields($setup);
+            $this->updateAddressAttributes($setup,$eavSetup);
         }
 
         $setup->endSetup();
     }
 
-    private function deleteOldFields($eavSetup,$setup){
-        $eavSetup ->removeAttribute(\Magento\Customer\Api\AddressMetadataInterface::ENTITY_TYPE_ADDRESS,'dni');
-        $eavSetup ->removeAttribute(\Magento\Customer\Api\AddressMetadataInterface::ENTITY_TYPE_ADDRESS,'celular');
-        $eavSetup ->removeAttribute(\Magento\Customer\Api\AddressMetadataInterface::ENTITY_TYPE_ADDRESS,'altura');
-        $eavSetup ->removeAttribute(\Magento\Customer\Api\AddressMetadataInterface::ENTITY_TYPE_ADDRESS,'piso');
-        $eavSetup ->removeAttribute(\Magento\Customer\Api\AddressMetadataInterface::ENTITY_TYPE_ADDRESS,'departamento');
-        $eavSetup ->removeAttribute(\Magento\Customer\Api\AddressMetadataInterface::ENTITY_TYPE_ADDRESS,'observaciones');
-
-        $customerAddressSetup = $this->customerSetupFactory->create(['setup' => $setup]);
-
-        $customerAddressEntity = $customerAddressSetup->getEavConfig()->getEntityType(
-            \Magento\Customer\Api\AddressMetadataInterface::ENTITY_TYPE_ADDRESS
-        );
-        $customerAddressSetup->removeAttribute('customer_address', "dni");
-        $customerAddressSetup->removeAttribute('customer_address', "celular");
-        $customerAddressSetup->removeAttribute('customer_address', "altura");
-        $customerAddressSetup->removeAttribute('customer_address', "piso");
-        $customerAddressSetup->removeAttribute('customer_address', "departamento");
-        $customerAddressSetup->removeAttribute('customer_address', "observaciones");
-    }
-
-    private function addNewFields($setup){
+    /**
+     * @var ModuleDataSetupInterface $setup
+     * @var EavSetup $eavSetup
+     */
+    private function updateAddressAttributes($setup, $eavSetup){
+        /**
+         * @var CustomerSetup $customerSetup
+         */
         $customerSetup = $this->customerSetupFactory->create(['setup' => $setup]);
-        $attributesAddressInfo = [
+
+        $addressAttributes = [
             'dni' => [
                 'label' => 'DNI',
                 'input' => 'text',
@@ -176,12 +161,22 @@ class UpgradeData implements UpgradeDataInterface
                 'backend' => ''
             ]
         ];
-        foreach ($attributesAddressInfo as $attributeCode => $attributeParams) {
-            $customerSetup->addAttribute(
-                \Magento\Customer\Api\AddressMetadataInterface::ENTITY_TYPE_ADDRESS,
-                $attributeCode,
-                $attributeParams
-            );
+        foreach ($addressAttributes as $attributeCode => $attributeParams){
+            if($eavSetup->getAttributeId(\Magento\Customer\Api\AddressMetadataInterface::ENTITY_TYPE_ADDRESS, $attributeCode)){
+               $eavSetup->updateAttribute(
+                   \Magento\Customer\Api\AddressMetadataInterface::ENTITY_TYPE_ADDRESS,
+                   $attributeCode,
+                   'required',
+                   false
+               );
+            }
+            else{
+                $customerSetup->addAttribute(
+                    \Magento\Customer\Api\AddressMetadataInterface::ENTITY_TYPE_ADDRESS,
+                    $attributeCode,
+                    $attributeParams
+                );
+            }
             $attribute = $customerSetup->getEavConfig()
                 ->getAttribute(
                     \Magento\Customer\Api\AddressMetadataInterface::ENTITY_TYPE_ADDRESS,
@@ -190,7 +185,8 @@ class UpgradeData implements UpgradeDataInterface
                 ->addData([
                     'used_in_forms' => [
                         'customer_address_edit',
-                        'customer_register_address'
+                        'customer_register_address',
+                        'adminhtml_customer_address'
                     ]
                 ]);
             $attribute->save();

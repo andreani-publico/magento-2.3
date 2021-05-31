@@ -4,177 +4,207 @@
         <section id="carriers" translate="label" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
             <group id="andreaniestandar" translate="label" type="text" sortOrder="400" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Andreani Estandar</label>
-                <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Habilitado</label>
+                <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" canRestore="1">
+                    <label>Enabled</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Título</label>
+                <field id="name" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Method Name</label>
                 </field>
-                <field id="description" translate="label" type="textarea" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Descripción</label>
+                <field id="sort_order" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1">
+                    <label>Sort Order</label>
+                    <validate>validate-number validate-zero-or-greater</validate>
                 </field>
-                <field id="showmethod" translate="label" type="select" sortOrder="920" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Mostrar mensaje de método no disponible en el checkout</label>
-                    <frontend_class>shipping-skip-hide</frontend_class>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment><![CDATA[Cuando esta opción este en <strong>SÍ</strong> y el método de envío tenga un error, lo mostrará en el checkout con su correspondiente mensaje (por ejemplo: "No existe cotización para el código postal ingresado"). En caso de estar seleccionado <strong>NO</strong>, y el método de envío tenga un error, éste no será mostrado en el checkout.]]></comment>
+                <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Title</label>
                 </field>
-                <field id="contrato" translate="label" type="text" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="contract" translate="label" type="text" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Contrato</label>
+                </field>
+                <field id="sallowspecific" translate="label" type="select" sortOrder="90" showInDefault="1" showInWebsite="1" canRestore="1">
+                    <label>Ship to Applicable Countries</label>
+                    <frontend_class>shipping-applicable-country</frontend_class>
+                    <source_model>Magento\Shipping\Model\Config\Source\Allspecificcountries</source_model>
+                </field>
+                <field id="specificcountry" translate="label" type="multiselect" sortOrder="91" showInDefault="1" showInWebsite="1">
+                    <label>Ship to Specific Countries</label>
+                    <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
+                    <can_be_empty>1</can_be_empty>
+                    <depends>
+                        <field id="sallowspecific">1</field>
+                    </depends>
+                </field>
+                <field id="showmethod" translate="label" type="select" sortOrder="80" showInDefault="1" showInWebsite="1">
+                    <label>Show Method if Not Applicable</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <frontend_class>shipping-skip-hide</frontend_class>
+                </field>
+                <field id="specificerrmsg" translate="label" type="textarea" sortOrder="81" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Displayed Error Message</label>
+                    <depends>
+                        <field id="showmethod">1</field>
+                    </depends>
                 </field>
             </group>
 
             <group id="andreanisucursal" translate="label" type="text" sortOrder="401" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Andreani Sucursal</label>
-                <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Habilitado</label>
+                <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" canRestore="1">
+                    <label>Enabled</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Título</label>
+                <field id="name" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Method Name</label>
                 </field>
-                <field id="description" translate="label" type="textarea" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Descripción</label>
+                <field id="sort_order" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1">
+                    <label>Sort Order</label>
+                    <validate>validate-number validate-zero-or-greater</validate>
                 </field>
-                <field id="showmethod" translate="label" type="select" sortOrder="920" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Mostrar mensaje de método no disponible en el checkout</label>
+                <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Title</label>
+                </field>
+                <field id="sallowspecific" translate="label" type="select" sortOrder="90" showInDefault="1" showInWebsite="1" canRestore="1">
+                    <label>Ship to Applicable Countries</label>
+                    <frontend_class>shipping-applicable-country</frontend_class>
+                    <source_model>Magento\Shipping\Model\Config\Source\Allspecificcountries</source_model>
+                </field>
+                <field id="specificcountry" translate="label" type="multiselect" sortOrder="91" showInDefault="1" showInWebsite="1">
+                    <label>Ship to Specific Countries</label>
+                    <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
+                    <can_be_empty>1</can_be_empty>
+                    <depends>
+                        <field id="sallowspecific">1</field>
+                    </depends>
+                </field>
+                <field id="showmethod" translate="label" type="select" sortOrder="80" showInDefault="1" showInWebsite="1">
+                    <label>Show Method if Not Applicable</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <frontend_class>shipping-skip-hide</frontend_class>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment><![CDATA[Cuando esta opción este en <strong>SÍ</strong> y el método de envío tenga un error, lo mostrará en el checkout con su correspondiente mensaje (por ejemplo: "No existe cotización para el código postal ingresado"). En caso de estar seleccionado <strong>NO</strong>, y el método de envío tenga un error, éste no será mostrado en el checkout.]]></comment>
                 </field>
-                <field id="contrato" translate="label" type="text" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="specificerrmsg" translate="label" type="textarea" sortOrder="81" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Displayed Error Message</label>
+                    <depends>
+                        <field id="showmethod">1</field>
+                    </depends>
+                </field>
+                <field id="contract" translate="label" type="text" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
                     <label>Contrato</label>
                 </field>
             </group>
 
             <group id="andreaniurgente" translate="label" type="text" sortOrder="402" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Andreani Urgente</label>
-                <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Habilitado</label>
+                <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" canRestore="1">
+                    <label>Enabled</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Título</label>
+                <field id="name" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Method Name</label>
                 </field>
-                <field id="description" translate="label" type="textarea" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Descripción</label>
+                <field id="sort_order" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1">
+                    <label>Sort Order</label>
+                    <validate>validate-number validate-zero-or-greater</validate>
                 </field>
-                <field id="showmethod" translate="label" type="select" sortOrder="920" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Mostrar mensaje de método no disponible en el checkout</label>
+                <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Title</label>
+                </field>
+                <field id="sallowspecific" translate="label" type="select" sortOrder="90" showInDefault="1" showInWebsite="1" canRestore="1">
+                    <label>Ship to Applicable Countries</label>
+                    <frontend_class>shipping-applicable-country</frontend_class>
+                    <source_model>Magento\Shipping\Model\Config\Source\Allspecificcountries</source_model>
+                </field>
+                <field id="specificcountry" translate="label" type="multiselect" sortOrder="91" showInDefault="1" showInWebsite="1">
+                    <label>Ship to Specific Countries</label>
+                    <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
+                    <can_be_empty>1</can_be_empty>
+                    <depends>
+                        <field id="sallowspecific">1</field>
+                    </depends>
+                </field>
+                <field id="showmethod" translate="label" type="select" sortOrder="80" showInDefault="1" showInWebsite="1">
+                    <label>Show Method if Not Applicable</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <frontend_class>shipping-skip-hide</frontend_class>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment><![CDATA[Cuando esta opción este en <strong>SÍ</strong> y el método de envío tenga un error, lo mostrará en el checkout con su correspondiente mensaje (por ejemplo: "No existe cotización para el código postal ingresado"). En caso de estar seleccionado <strong>NO</strong>, y el método de envío tenga un error, éste no será mostrado en el checkout.]]></comment>
                 </field>
-                <field id="contrato" translate="label" type="text" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="specificerrmsg" translate="label" type="textarea" sortOrder="81" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Displayed Error Message</label>
+                    <depends>
+                        <field id="showmethod">1</field>
+                    </depends>
+                </field>
+                <field id="contract" translate="label" type="text" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Contrato</label>
                 </field>
             </group>
         </section>
         <section id="shipping" translate="label" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
-            <group id="andreani_configuracion" translate="label" type="text" sortOrder="399" showInDefault="1" showInWebsite="1" showInStore="1">
+            <group id="andreani_configuration" translate="label" type="text" sortOrder="399" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Configuración General de Andreani</label>
-                <field id="modo" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Modo</label>
-                    <comment><![CDATA[El modo define a qué urls debe conectarse el modulo en cada webservice.]]></comment>
-                    <source_model>DrubuNet\Andreani\Model\Source\Modo</source_model>
+                <field id="production_mode" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Production mode</label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
                 </field>
-                <field id="log_generacion_guias" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Habilitar debug de generación de guías y errores</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment><![CDATA[Cuando este modo se encuentra habilitado, se genera un log cada vez que el sitio se conecta con Andreani para crear una guía de envío. Se guardan los datos enviados y recibidos. También se guarda el stacktrace completo de errores al conectarse al webservice.]]></comment>
+                <field id="debug_mode" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Debug mode</label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
                 </field>
-                <field id="usuario" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="username" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Usuario</label>
                 </field>
-                <field id="password" translate="label" type="password" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="password" translate="label" type="obscure" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Password</label>
                     <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
                 </field>
-                <field id="numero_cliente" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="client_number" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Número de cliente</label>
                 </field>
-                <field id="unidad_medida" translate="label" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Unidad de medida</label>
-                    <source_model>DrubuNet\Andreani\Model\Source\UnidadMedida</source_model>
+                <field id="weight_unit" translate="label" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Unidad de medida de origen</label>
+                    <source_model>DrubuNet\Andreani\Model\Source\WeightUnit</source_model>
+                    <comment><![CDATA[Es la unidad de medida base de la tienda.]]></comment>
                 </field>
-                <field id="peso_maximo" translate="label" type="select" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Peso máximo habilitado</label>
-                    <source_model>DrubuNet\Andreani\Model\Source\PesoMaximo</source_model>
+                <field id="product_fixed_price" translate="label" type="text" sortOrder="8" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Precio fijo de productos</label>
+                    <comment><![CDATA[Dejar en blanco para que se calcule desde el precio del producto.]]></comment>
                 </field>
-                <field id="generacion_guia" translate="label" type="select" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Generación de guías</label>
-                    <comment><![CDATA[Por defecto, se genera una guía por pedido.]]></comment>
-                    <source_model>DrubuNet\Andreani\Model\Source\GeneracionGuia</source_model>
-                </field>
-                <field id="tipo_cotizacion" translate="label" type="select" sortOrder="8" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Tipo de cotizacion</label>
-                    <source_model>DrubuNet\Andreani\Model\Source\TipoCotizacion</source_model>
-                </field>
-                <field id="precio_fijo" translate="label" type="text" sortOrder="8" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Precio fijo de productos (sin completar para que tome los precios de los productos(</label>
-                </field>
-                <field id="volumen_fijo" translate="label" type="text" sortOrder="8" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Número de cliente (sin completar para que calcule el volumen de los productos)</label>
-                </field>
-                <field id="upload_image" translate="label comment" type="image" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Logo empresa</label>
-                    <comment><![CDATA[Carga la imagen del logo de su empresa, para luego ser utilizado en la impresion de guias.]]></comment>
-                    <backend_model>DrubuNet\Andreani\Model\Config\Backend\Image</backend_model>
-                    <base_url type="media" scope_info="1">andreani/logo_empresa</base_url>
+                <field id="product_fixed_volume" translate="label" type="text" sortOrder="8" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Volumen fijo de productos</label>
+                    <comment><![CDATA[Dejar en blanco para que se calcule desde el volumen del producto. <br><strong>Importante: Para calcularlo desde el producto es necesario completar el atributo "volumen" para cada producto del sitio.</strong>]]></comment>
                 </field>
                 <field id="tracking_url" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Url para seguimiento de envíos</label>
                     <comment>La url ingresada no debe terminar con "/"</comment>
                 </field>
-                <!--<field id="andreani_trans_emails" translate="label" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Emails Transaccionales</label>
-                    <source_model>DrubuNet\Andreani\Model\Source\TransEmails</source_model>
-                    <comment>Seleccione el email donde desea que se notifique cuando una guía ha sido generada correctamente. Por defecto, los mails se envían al mail Representante de Ventas.</comment>
-                </field>
-                <field id="andreani_emails_transaccionales" translate="label comment" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Template Emails Transaccionales</label>
-                    <source_model>Magento\Config\Model\Config\Source\Email\Template</source_model>
-                    <comment>Template Email que se usará para notificar la generación de las guía.</comment>
-                </field>-->
-                <field id="calculadorpdp" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Mostrar calculador en la pagina de producto</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                </field>
-                <field id="tipo_ws" translate="label" type="select" sortOrder="81" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Consumir servicio:</label>
-                    <source_model>DrubuNet\Andreani\Model\Source\WebserviceMethod</source_model>
-                </field>
-                <group id="andreani_datos_origen" translate="label" type="text" sortOrder="402" showInDefault="1" showInWebsite="1" showInStore="1">
+                <group id="andreani_origin_info" translate="label" type="text" sortOrder="402" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Datos del origen del envio</label>
-                    <field id="calle" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <field id="street" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Calle</label>
                         <comment><![CDATA[Calle del origen del envio. <strong>Obligatorio</strong>]]></comment>
                         <validate>required-entry</validate>
                     </field>
-                    <field id="numero" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <field id="number" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Altura</label>
                         <comment><![CDATA[Altura de la calle del origen del envio. <strong>Obligatorio</strong>]]></comment>
                         <validate>required-entry</validate>
                     </field>
-                    <field id="entreCalle" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <field id="betweenStreets" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Entre calles</label>
                         <comment><![CDATA[Entre calles de la calle del origen del envio. <strong>Opcional.</strong>]]></comment>
                     </field>
-                    <field id="piso" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <field id="floor" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Piso</label>
                         <comment><![CDATA[Piso de la calle del origen del envio. <strong>Opcional.</strong>]]></comment>
                     </field>
-                    <field id="departamento" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <field id="apartment" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Departamento</label>
                         <comment><![CDATA[Departamento de la calle del origen del envio. <strong>Opcional.</strong>]]></comment>
                     </field>
-                    <field id="codigoPostal" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <field id="postcode" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Codigo Postal</label>
                         <comment><![CDATA[Código postal origen del envío. <strong>Obligatorio</strong>]]></comment>
                         <validate>required-entry</validate>
                     </field>
-                    <field id="localidad" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <field id="city" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Localidad</label>
                         <comment><![CDATA[Localidad origen del envío. <strong>Obligatorio</strong>]]></comment>
                         <validate>required-entry</validate>
@@ -183,180 +213,118 @@
                         <label>Region</label>
                         <comment><![CDATA[Región destino del envío codificado en ISO 3166-2:AR. <strong>Opcional</strong>]]></comment>
                     </field>
-                    <field id="pais" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <field id="country" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Pais</label>
                         <comment><![CDATA[País destino del envío. <strong>Opcional. Por defecto Argentina.</strong>]]></comment>
                     </field>
                 </group>
-                <group id="andreani_datos_remitente" translate="label" type="text" sortOrder="402" showInDefault="1" showInWebsite="1" showInStore="1">
+                <group id="andreani_sender_info" translate="label" type="text" sortOrder="402" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Datos del remitente</label>
-                    <field id="nombreCompleto" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <field id="fullname" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Nombre completo</label>
                         <comment><![CDATA[Nombre o razón social del remitente del envío. <strong>Obligatorio</strong>]]></comment>
                         <validate>required-entry</validate>
                     </field>
-                    <field id="eMail" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <field id="email" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Email</label>
                         <comment><![CDATA[Correo electrónico del remitente del envío. <strong>Obligatorio</strong>]]></comment>
                         <validate>required-entry</validate>
                     </field>
-                    <field id="documentoTipo" translate="label" type="select" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <field id="idType" translate="label" type="select" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Documento tipo</label>
                         <comment><![CDATA[Tipo de documento del remitente del envío. <strong>Obligatorio.</strong>]]></comment>
-                        <source_model>DrubuNet\Andreani\Model\Source\TipoDocumento</source_model>
+                        <source_model>DrubuNet\Andreani\Model\Source\DocumentType</source_model>
                         <validate>required-entry</validate>
                     </field>
-                    <field id="documentoNumero" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <field id="idNumber" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Numero de documento</label>
                         <comment><![CDATA[Numero de documento del remitente del envío. <strong>Obligatorio.</strong>]]></comment>
                         <validate>required-entry</validate>
                     </field>
-                    <field id="telefonoTipo" translate="label" type="select" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <field id="phoneType" translate="label" type="select" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Tipo telefono</label>
                         <comment><![CDATA[Tipo de telefono del remitente del envío. <strong>Obligatorio.</strong>]]></comment>
-                        <source_model>DrubuNet\Andreani\Model\Source\TipoTelefono</source_model>
+                        <source_model>DrubuNet\Andreani\Model\Source\TelephoneType</source_model>
                         <validate>required-entry</validate>
                     </field>
-                    <field id="telefonoNumero" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <field id="phoneNumber" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Numero telefono</label>
                         <comment><![CDATA[Numero de telefono del remitente del envío. <strong>Obligatorio</strong>]]></comment>
                         <validate>required-entry</validate>
                     </field>
                 </group>
-
-                <group id="andreani_ws_prod_urls" translate="label" type="text" sortOrder="402" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Andreani Urls WS producción</label>
-                    <field id="cotizacion" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Cotización</label>
-                        <comment><![CDATA[Url método <strong>CotizarEnvio</strong>]]></comment>
+                <group id="andreani_rest_prod_urls" translate="label" type="text" sortOrder="402" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Andreani Urls Rest produccion</label>
+                    <field id="login" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Login</label>
+                        <validate>required-entry</validate>
                     </field>
-                    <field id="cotizacion_soap_version" translate="label" type="select" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Versión SOAP Cotización:</label>
-                        <source_model>DrubuNet\Andreani\Model\Source\SoapVersion</source_model>
+                    <field id="rates" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Cotizar un Envío</label>
+                        <comment>Devuelve la tarifa de un envio a partir de parametros como el destino, el peso, el volumen, el valor declarado del producto</comment>
+                        <validate>required-entry</validate>
                     </field>
-                    <field id="trazabilidad" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Trazabilidad</label>
-                        <comment><![CDATA[Url método <strong>ObtenerTrazabilidad</strong>]]></comment>
+                    <field id="createOrder" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Crear una nueva orden</label>
+                        <comment>Una órden de envío es un pedido de envío que se le hace a Andreani. De esta forma Andreani puede planificar la entrega sin tener la carga todavía en su poder</comment>
+                        <validate>required-entry</validate>
                     </field>
-                    <field id="trazabilidad_soap_version" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Versión SOAP Trazabilidad:</label>
-                        <source_model>DrubuNet\Andreani\Model\Source\SoapVersion</source_model>
+                    <field id="label" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Obtener una etiqueta de una orden</label>
+                        <comment>Devuelve una etiqueta en formato PDF, que puede ser de bulto o remito a partir del numero andreani brindado en el alta</comment>
+                        <validate>required-entry</validate>
                     </field>
-                    <field id="impresionconstancia" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Impresión constancia</label>
-                        <comment><![CDATA[Url método <strong>ImprimirConstancia</strong>]]></comment>
+                    <field id="shippingByNumber" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Obtener un envío</label>
+                        <comment>Devuelve la información de un envío por Número Andreani.</comment>
+                        <validate>required-entry</validate>
                     </field>
-                    <field id="impresionconstancia_soap_version" translate="label" type="select" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Versión SOAP Impresión constancia:</label>
-                        <source_model>DrubuNet\Andreani\Model\Source\SoapVersion</source_model>
+                    <field id="provinces" translate="label" type="text" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Listar todas las provincias</label>
+                        <comment>Lista las provinicas reconocidas según ISO-3166-2:AR (https://es.wikipedia.org/wiki/ISO_3166-2:AR).</comment>
+                        <validate>required-entry</validate>
                     </field>
-                    <field id="obtenerestadodistribucion" translate="label" type="text" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Estado Distribución</label>
-                        <comment><![CDATA[Url método <strong>ObtenerEstadoDistribucion</strong>]]></comment>
-                    </field>
-                    <field id="obtenerestadodistribucion_soap_version" translate="label" type="select" sortOrder="8" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Versión SOAP Estado Distribución:</label>
-                        <source_model>DrubuNet\Andreani\Model\Source\SoapVersion</source_model>
-                    </field>
-                    <field id="sucursales" translate="label" type="text" sortOrder="9" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Sucursales</label>
-                        <comment><![CDATA[Url método <strong>ConsultarSucursales</strong>]]></comment>
-                    </field>
-                    <field id="sucursales_soap_version" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Versión SOAP Sucursales:</label>
-                        <source_model>DrubuNet\Andreani\Model\Source\SoapVersion</source_model>
-                    </field>
-                    <field id="confirmacioncompra" translate="label" type="text" sortOrder="11" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Confirmar compra</label>
-                        <comment><![CDATA[Url método <strong>ConfirmarCompra</strong>]]></comment>
-                    </field>
-                    <field id="confirmacioncompra_soap_version" translate="label" type="select" sortOrder="12" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Versión SOAP Confirmar compra:</label>
-                        <source_model>DrubuNet\Andreani\Model\Source\SoapVersion</source_model>
-                    </field>
-                    <field id="generarenviosdeentregayretirocondatosdeimpresion" translate="label" type="text" sortOrder="13" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Generar envíos de entrega y retiro con datos de impresión</label>
-                        <comment><![CDATA[Url método <strong>GenerarEnviosDeEntregaYRetiroConDatosDeImpresion</strong>]]></comment>
-                    </field>
-                    <field id="generarenviosdeentregayretirocondatosdeimpresion_soap_version" translate="label" type="select" sortOrder="14" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Versión SOAP Generar envíos de entrega y retiro con datos de impresión:</label>
-                        <source_model>DrubuNet\Andreani\Model\Source\SoapVersion</source_model>
-                    </field>
-                    <field id="anularenvio" translate="label" type="text" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Anular Envío</label>
-                        <comment><![CDATA[Url método <strong>AnularEnvios</strong>]]></comment>
-                    </field>
-                    <field id="anularenvio_soap_version" translate="label" type="select" sortOrder="16" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Versión SOAP Anular Envío:</label>
-                        <source_model>DrubuNet\Andreani\Model\Source\SoapVersion</source_model>
+                    <field id="locations" translate="label" type="text" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Listar todas las sucursales</label>
+                        <comment>Lista todas las sucursales de Andreani.</comment>
+                        <validate>required-entry</validate>
                     </field>
                 </group>
-
-                <group id="andreani_ws_dev_urls" translate="label" type="text" sortOrder="403" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Andreani Urls WS desarrollo</label>
-                    <field id="cotizacion" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Cotización</label>
-                        <comment><![CDATA[Url método <strong>CotizarEnvio</strong>]]></comment>
+                <group id="andreani_rest_dev_urls" translate="label" type="text" sortOrder="403" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Andreani Urls Rest desarrollo</label>
+                    <field id="login" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Login</label>
+                        <validate>required-entry</validate>
                     </field>
-                    <field id="cotizacion_soap_version" translate="label" type="select" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Versión SOAP Cotización:</label>
-                        <source_model>DrubuNet\Andreani\Model\Source\SoapVersion</source_model>
+                    <field id="rates" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Cotizar un Envío</label>
+                        <comment>Devuelve la tarifa de un envio a partir de parametros como el destino, el peso, el volumen, el valor declarado del producto</comment>
+                        <validate>required-entry</validate>
                     </field>
-                    <field id="trazabilidad" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Trazabilidad</label>
-                        <comment><![CDATA[Url método <strong>ObtenerTrazabilidad</strong>]]></comment>
+                    <field id="createOrder" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Crear una nueva orden</label>
+                        <comment>Una órden de envío es un pedido de envío que se le hace a Andreani. De esta forma Andreani puede planificar la entrega sin tener la carga todavía en su poder</comment>
+                        <validate>required-entry</validate>
                     </field>
-                    <field id="trazabilidad_soap_version" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Versión SOAP Trazabilidad:</label>
-                        <source_model>DrubuNet\Andreani\Model\Source\SoapVersion</source_model>
+                    <field id="label" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Obtener una etiqueta de una orden</label>
+                        <comment>Devuelve una etiqueta en formato PDF, que puede ser de bulto o remito a partir del numero andreani brindado en el alta</comment>
+                        <validate>required-entry</validate>
                     </field>
-                    <field id="impresionconstancia" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Impresión constancia</label>
-                        <comment><![CDATA[Url método <strong>ImprimirConstancia</strong>]]></comment>
+                    <field id="shippingByNumber" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Obtener un envío</label>
+                        <comment>Devuelve la información de un envío por Número Andreani.</comment>
+                        <validate>required-entry</validate>
                     </field>
-                    <field id="impresionconstancia_soap_version" translate="label" type="select" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Versión SOAP Impresión constancia:</label>
-                        <source_model>DrubuNet\Andreani\Model\Source\SoapVersion</source_model>
+                    <field id="provinces" translate="label" type="text" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Listar todas las provincias</label>
+                        <comment>Lista las provinicas reconocidas según ISO-3166-2:AR (https://es.wikipedia.org/wiki/ISO_3166-2:AR).</comment>
+                        <validate>required-entry</validate>
                     </field>
-                    <field id="obtenerestadodistribucion" translate="label" type="text" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Estado Distribución</label>
-                        <comment><![CDATA[Url método <strong>ObtenerEstadoDistribucion</strong>]]></comment>
-                    </field>
-                    <field id="obtenerestadodistribucion_soap_version" translate="label" type="select" sortOrder="8" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Versión SOAP Estado Distribución:</label>
-                        <source_model>DrubuNet\Andreani\Model\Source\SoapVersion</source_model>
-                    </field>
-                    <field id="sucursales" translate="label" type="text" sortOrder="9" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Sucursales</label>
-                        <comment><![CDATA[Url método <strong>ConsultarSucursales</strong>]]></comment>
-                    </field>
-                    <field id="sucursales_soap_version" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Versión SOAP Sucursales:</label>
-                        <source_model>DrubuNet\Andreani\Model\Source\SoapVersion</source_model>
-                    </field>
-                    <field id="confirmacioncompra" translate="label" type="text" sortOrder="11" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Confirmar compra</label>
-                        <comment><![CDATA[Url método <strong>ConfirmarCompra</strong>]]></comment>
-                    </field>
-                    <field id="confirmacioncompra_soap_version" translate="label" type="select" sortOrder="12" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Versión SOAP Confirmar compra:</label>
-                        <source_model>DrubuNet\Andreani\Model\Source\SoapVersion</source_model>
-                    </field>
-                    <field id="generarenviosdeentregayretirocondatosdeimpresion" translate="label" type="text" sortOrder="13" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Generar envíos de entrega y retiro con datos de impresión</label>
-                        <comment><![CDATA[Url método <strong>GenerarEnviosDeEntregaYRetiroConDatosDeImpresion</strong>]]></comment>
-                    </field>
-                    <field id="generarenviosdeentregayretirocondatosdeimpresion_soap_version" translate="label" type="select" sortOrder="14" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Versión SOAP Generar envíos de entrega y retiro con datos de impresión:</label>
-                        <source_model>DrubuNet\Andreani\Model\Source\SoapVersion</source_model>
-                    </field>
-                    <field id="anularenvio" translate="label" type="text" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Anular Envío</label>
-                        <comment><![CDATA[Url método <strong>AnularEnvios</strong>]]></comment>
-                    </field>
-                    <field id="anularenvio_soap_version" translate="label" type="select" sortOrder="16" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Versión SOAP Anular Envío:</label>
-                        <source_model>DrubuNet\Andreani\Model\Source\SoapVersion</source_model>
+                    <field id="locations" translate="label" type="text" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Listar todas las sucursales</label>
+                        <comment>Lista todas las sucursales de Andreani.</comment>
+                        <validate>required-entry</validate>
                     </field>
                 </group>
             </group>

@@ -1,40 +1,39 @@
 <?xml version="1.0"?>
-<!--
-/**
-* Inyeccion de dependencias para crear collections virtuales y utilizarlas como data provider en las grdrubunet
-*
-*/
--->
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    <preference for="DrubuNet\Andreani\Api\SucursalManagementInterface" type="DrubuNet\Andreani\Model\SucursalManagement" />
-    <preference for="DrubuNet\Andreani\Api\Data\SucursalInterface" type="DrubuNet\Andreani\Model\Sucursal" />
-    <preference for="DrubuNet\Andreani\Api\Data\ProvinciaInterface" type="DrubuNet\Andreani\Model\Provincia" />
-    <preference for="DrubuNet\Andreani\Api\Data\LocalidadInterface" type="DrubuNet\Andreani\Model\Localidad" />
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Api/etc/extension_attributes.xsd">
+    <type name="Magento\Config\Model\Config\TypePool">
+        <arguments>
+            <argument name="sensitive" xsi:type="array">
+                <item name="shipping/andreani_configuration/password" xsi:type="string">1</item>
+                <item name="shipping/andreani_configuration/username" xsi:type="string">1</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- Plugin for add custom attributes in shipping and billing address form -->
     <type name="Magento\Checkout\Block\Checkout\LayoutProcessor">
-        <plugin name="add-andreani-field" type="DrubuNet\Andreani\Plugin\Checkout\LayoutProcessorPlugin" sortOrder="10"/>
+        <plugin name="DrubuNet\Andreani\Checkout\LayoutProcessorPlugin" type="DrubuNet\Andreani\Plugin\Checkout\LayoutProcessorPlugin" sortOrder="10"/>
     </type>
-    <type name="Magento\Checkout\Model\ShippingInformationManagement">
-        <plugin name="save-in-quote" type="DrubuNet\Andreani\Plugin\Checkout\ShippingInformationManagementPlugin" sortOrder="10"/>
+
+    <!-- Plugin for saving custom attributes in quote/order address -->
+    <type name="Magento\Quote\Model\BillingAddressManagement">
+        <plugin name="DrubuNet\Andreani\Quote\Model\BillingAddressManagement" sortOrder="10" type="DrubuNet\Andreani\Plugin\Quote\Model\BillingAddressManagement"/>
     </type>
-    <type name="Magento\Quote\Model\Quote\Address\ToOrderAddress">
-        <plugin name="save-in-order-address" type="DrubuNet\Andreani\Plugin\Quote\Address\ToOrderAddressPlugin" sortOrder="11"/>
+
+    <type name="Magento\Quote\Model\Quote\Address\BillingAddressPersister">
+        <plugin name="DrubuNet\Andreani\Quote\Model\Quote\Address\BillingAddressPersister" sortOrder="10" type="DrubuNet\Andreani\Plugin\Quote\Model\Quote\Address\BillingAddressPersister"/>
     </type>
-    <type name="Magento\Customer\Model\ResourceModel\AddressRepository">
-        <plugin name="andreani-campos-custom-billing-address-usuario-invitado" type="DrubuNet\Andreani\Plugin\Customer\AddressRepositoryPlugin" sortOrder="100"/>
+
+    <type name="Magento\Quote\Model\ShippingAddressManagement">
+        <plugin name="DrubuNet\Andreani\Quote\Model\ShippingAddressManagement" sortOrder="10" type="DrubuNet\Andreani\Plugin\Quote\Model\ShippingAddressManagement"/>
     </type>
-    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
-        <plugin name="andreani_sales_order_filters" type="DrubuNet\Andreani\Plugin\Adminhtml\Order\CustomFiltersSalesOrderGridCollection" sortOrder="100"/>
-    </type>
+
+    <!-- Data provider for Andreani grid -->
     <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
         <arguments>
             <argument name="collections" xsi:type="array">
                 <item name="andreani_sales_order_grid_data_source" xsi:type="string">Magento\Sales\Model\ResourceModel\Order\Grid\Collection</item>
             </argument>
         </arguments>
-    </type>
-
-    <!--add new-->
-    <type name="Magento\Quote\Model\Quote\Address\BillingAddressPersister">
-        <plugin disabled="false" name="BillingAddressSave" sortOrder="10" type="DrubuNet\Andreani\Plugin\Magento\Quote\Model\Quote\Address\BillingAddressPersister"/>
     </type>
 </config>
