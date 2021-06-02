@@ -21,12 +21,14 @@ define(
                                 return this.currentBillingAddress().customAttributes[attribute_code];
                             }
 
-                            candidate = this.currentBillingAddress().customAttributes.find(function (attr) {
-                                return attr.attribute_code === attribute_code;
-                            });
+                            if (Array.isArray(this.currentBillingAddress().customAttributes)) {
+                                candidate = this.currentBillingAddress().customAttributes.find(function (attr) {
+                                    return attr.attribute_code === attribute_code;
+                                });
 
-                            if (candidate) {
-                                return candidate.value;
+                                if (candidate) {
+                                    return candidate.value;
+                                }
                             }
                         }
 
