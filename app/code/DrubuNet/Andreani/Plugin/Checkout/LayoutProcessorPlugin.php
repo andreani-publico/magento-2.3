@@ -1,7 +1,6 @@
 <?php
 namespace DrubuNet\Andreani\Plugin\Checkout;
 
-
 class LayoutProcessorPlugin
 {
 
@@ -167,30 +166,33 @@ class LayoutProcessorPlugin
                 'id' => 'observaciones'
             ]
         ];
-        foreach ($attributesConfig as $attributeCode => $attributeValue){
+        foreach ($attributesConfig as $attributeCode => $attributeValue) {
             if (isset($jsLayout['components']['checkout']['children']['steps']['children']['billing-step']['children']
-                ['payment']['children']['payments-list']['children']))
-            {
-                foreach ($jsLayout['components']['checkout']['children']['steps']['children']['billing-step']['children']['payment']['children']['payments-list']['children'] as $key => $payment)
-                {
+                ['payment']['children']['payments-list']['children'])) {
+                foreach ($jsLayout['components']['checkout']['children']['steps']['children']['billing-step']
+                         ['children']['payment']['children']['payments-list']['children'] as $key => $payment) {
                     // Skip extra children like before-place-order, paypal-captcha and braintree-recaptcha
                     if (!preg_match('/-form$/', $key)) {
                         continue;
                     }
 
-                    $paymentCode = 'billingAddress'.str_replace('-form','',$key);
+                    $paymentCode = 'billingAddress'.str_replace('-form', '', $key);
                     $attributeValue['config']['customScope'] = $paymentCode . '.custom_attributes';
                     $attributeValue['dataScope'] = $paymentCode . '.custom_attributes.' . $attributeCode;
-                    $jsLayout['components']['checkout']['children']['steps']['children']['billing-step']['children']['payment']['children']['payments-list']['children'][$key]['children']['form-fields']['children'][$attributeCode] = $attributeValue;
+                    $jsLayout['components']['checkout']['children']['steps']['children']['billing-step']['children']
+                        ['payment']['children']['payments-list']['children'][$key]['children']['form-fields']
+                        ['children'][$attributeCode] = $attributeValue;
                 }
 
             }
 
-            if(isset($jsLayout['components']['checkout']['children']['steps']['children']['shipping-step']['children']['shippingAddress']['children']['shipping-address-fieldset'])
-            ){
+            if (isset($jsLayout['components']['checkout']['children']['steps']['children']['shipping-step']['children']
+                    ['shippingAddress']['children']['shipping-address-fieldset'])) {
                 $attributeValue['config']['customScope'] = 'shippingAddress.custom_attributes';
                 $attributeValue['dataScope'] = 'shippingAddress.custom_attributes.' . $attributeCode;
-                $jsLayout['components']['checkout']['children']['steps']['children']['shipping-step']['children']['shippingAddress']['children']['shipping-address-fieldset']['children'][$attributeCode] = $attributeValue;
+                $jsLayout['components']['checkout']['children']['steps']['children']['shipping-step']['children']
+                    ['shippingAddress']['children']['shipping-address-fieldset']['children']
+                    [$attributeCode] = $attributeValue;
             }
         }
 
