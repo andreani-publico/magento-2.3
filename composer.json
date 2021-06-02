@@ -26,7 +26,8 @@
         "magento/module-quote": "^101.1",
         "magento/module-directory": "^100.3",
         "magento/module-catalog-inventory": "^100.3",
-        "magento/module-eav": "^102.0"
+        "magento/module-eav": "^102.0",
+        "laminas/laminas-log": "^2.13"
     },
     "repositories": [{
             "type": "composer",
