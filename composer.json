@@ -36,5 +36,8 @@
         }],
     "config": {
         "sort-packages": true
+    },
+    "require-dev": {
+        "magento/magento-coding-standard": "^6.0"
     }
 }
