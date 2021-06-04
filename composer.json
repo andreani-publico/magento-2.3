@@ -12,7 +12,7 @@
     "require": {
         "ext-curl": "*",
         "ext-json": "*",
-        "laminas/laminas-log": "^2.13",
+        "laminas/laminas-log": "^2.12",
         "magento/framework": "^102.0|^103.0",
         "magento/module-backend": "^101.0|^102.0",
         "magento/module-catalog": "^103.0|^104.0",
