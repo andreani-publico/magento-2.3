@@ -1,0 +1,337 @@
+<?php
+$originAddress = $block->getAndreaniOriginAddress();
+$destinationAddress = $block->getAndreaniDestinationAddress();
+$addressTemplate = $block->getAndreaniAddressTemplate();
+?>
+<form id="edit_form" method="post" action="<?= $block->escapeUrl($block->getSaveUrl()) ?>">
+    <div><input name="form_key" type="hidden" value="<?php /* @escapeNotVerified */
+        echo $block->getFormKey() ?>"/></div>
+    <?= $block->getChildHtml('order_info') ?>
+    <section class="admin__page-section order-addresses">
+        <div class="admin__page-section-title">
+            <span class="title"><?= $block->escapeHtml(__('Address Information')) ?></span>
+        </div>
+        <div class="admin__page-section-content">
+            <div class="admin__page-section-item order-billing-address">
+                <?php /* Billing Address */ ?>
+                <div class="admin__page-section-item-title">
+                    <span class="title"><?= $block->escapeHtml(__('Origin Address')) ?></span>
+                    <?php if (!$block->isAndreaniViewOperation()) : ?>
+                        <div class="actions"><a id="origin-address-edit">Edit</a></div>
+                    <?php endif; ?>
+                </div>
+                <div id="origin-address-template" class="admin__page-section-item-content"><?= $originAddress['template'] ?></div>
+                <input type="hidden" id="origin-address-input" name="origin-address-input"
+                       value="<?= $originAddress['input'] ?>">
+            </div>
+            <?php if (!$block->getOrder()->getIsVirtual()) : ?>
+                <div class="admin__page-section-item order-shipping-address">
+                    <?php /* Shipping Address */ ?>
+                    <div class="admin__page-section-item-title">
+                        <span class="title"><?= $block->escapeHtml(__('Destination Address')) ?></span>
+                        <?php if (!$block->isAndreaniViewOperation()) : ?>
+                            <div class="actions"><a id="destination-address-edit">Edit</a></div>
+                        <?php endif; ?>
+                    </div>
+                    <div id="destination-address-template" class="admin__page-section-item-content"><?= $destinationAddress['template'] ?></div>
+                    <input type="hidden" id="destination-address-input" name="destination-address-input"
+                           value="<?= $destinationAddress['input'] ?>">
+                </div>
+            <?php endif; ?>
+        </div>
+    </section>
+    <!-- Items section -->
+    <section class="admin__page-section">
+        <?php if ($block->isAndreaniViewOperation()) : ?>
+        <div class="admin__page-section-title">
+            <span class="title"><?= $block->escapeHtml(__('Items Shipped')) ?></span>
+        </div>
+        <div class="admin__table-wrapper">
+            <table class="data-table admin__table-primary order-shipment-table">
+                <thead>
+                <tr class="headings">
+                    <th class="col-product"><span><?= $block->escapeHtml(__('Product')) ?></span></th>
+                    <th class="col-qty last">
+                        <span><?= $block->escapeHtml(__('Qty Shipped')) ?></span>
+                    </th>
+                </tr>
+                </thead>
+                <?php $_items = $block->getAndreaniOrderItems();
+                $_i = count($_items); ?>
+                <tbody class="<?= $_i % 2 ? 'odd' : 'even' ?>">
+                <?php foreach ($_items as $_item): ?>
+                    <tr>
+                        <td class="col-product">
+                            <div id="order_item_<?= (int)$_item->getId() ?>_title"
+                                 class="product-title">
+                                <?= $block->escapeHtml($_item->getName()) ?>
+                            </div>
+                            <div class="product-sku-block">
+                                <span><?= $block->escapeHtml(__('SKU')) ?>:</span> <?= /* @noEscape */
+                                implode('<br />', $this->helper(\Magento\Catalog\Helper\Data::class)->splitSku($block->escapeHtml($_item->getSku()))) ?>
+                            </div>
+                        </td>
+                        <td class="col-qty last">
+                            <?= $_item->getQty() ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+                <?php else : ?>
+                <div class="admin__page-section-title">
+                    <span class="title"><?= $block->escapeHtml(__('Items to Ship')) ?></span>
+                </div>
+                <div class="admin__table-wrapper">
+                    <table class="data-table admin__table-primary order-shipment-table">
+                        <thead>
+                        <tr class="headings">
+                            <th class="col-product"><span><?= $block->escapeHtml(__('Product')) ?></span></th>
+                            <th class="col-ordered-qty"><span><?= $block->escapeHtml(__('Qty')) ?></span></th>
+                            <th class="col-qty">
+                                <span><?= $block->escapeHtml(__('Qty to Ship')) ?></span>
+                            </th>
+                        </tr>
+                        </thead>
+                        <?php $_items = $block->getOrder()->getAllItems() ?>
+                        <?php $_i = 0;
+                        foreach ($_items as $_item) :
+                            if ($_item->getParentItem()) :
+                                continue;
+                            endif;
+                            $_i++ ?>
+                            <tbody class="<?= $_i % 2 ? 'odd' : 'even' ?>">
+                            <tr>
+                                <td class="col-product">
+                                    <div id="order_item_<?= (int)$_item->getId() ?>_title"
+                                         class="product-title">
+                                        <?= $block->escapeHtml($_item->getName()) ?>
+                                    </div>
+                                    <div class="product-sku-block">
+                                        <span><?= $block->escapeHtml(__('SKU')) ?>:</span> <?= /* @noEscape */
+                                        implode('<br />', $this->helper(\Magento\Catalog\Helper\Data::class)->splitSku($block->escapeHtml($_item->getSku()))) ?>
+                                    </div>
+                                </td>
+                                <td class="col-ordered-qty">
+                                    <table class="qty-table">
+                                        <tr>
+                                            <th><?= $block->escapeHtml(__('Ordered')); ?></th>
+                                            <td class="max-qty-for-<?= $_item->getSku() ?>"><?= (float)$_item->getQtyOrdered() ?></td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td class="col-qty">
+                                    <input type="text"
+                                           class="input-text admin__control-text qty-item"
+                                           id="item_qty"
+                                           name="item_qty_for_<?= $_item->getSku() ?>"
+                                           value="<?= /* @noEscape */
+                                           $_item->getQty() * 1 ?>"/>
+                                </td>
+                            </tr>
+                            </tbody>
+                        <?php endforeach; ?>
+                        <?php endif; ?>
+                    </table>
+                </div>
+    </section>
+    <section class="admin__page-section">
+        <div class=" order-totals-actions">
+            <div class="admin__page-section-item-content">
+                <?= $block->getChildHtml('submit_before') ?>
+                <div class="order-history-comments-actions actions">
+                    <?= $block->getChildHtml('submit_button') ?>
+                    <?= $block->getChildHtml('submit_after') ?>
+                </div>
+
+            </div>
+        </div>
+    </section>
+    <div id="popup-modal" style="display: none">
+        <form action="<?= $block->escapeUrl($block->getFormUrl()) ?>" method="post" id="order-view-add-warranty-form">
+            <!--<input name="firstname" type="text">
+            <input name="lastname" type="text">
+            <input name="phone" type="text">
+            <input name="bookingTime" type="date">
+            <input type="button" value="Submit" id="order-view-add-warranty">-->
+            <?php foreach ($originAddress['data'] as $key => $value): ?>
+                <div class="admin__field field field-<?= $key ?>"
+                     data-ui-id="sales-order-address-form-container-form-fieldset-element-form-field-<?= $key ?>">
+                    <label class="label admin__field-label" for="<?= $key ?>"
+                           data-ui-id="sales-order-address-form-container-form-fieldset-element-text-<?= $key ?>-label"><span><?= $key ?></span></label>
+                    <div class="admin__field-control control">
+                        <input id="<?= $key ?>" name="<?= $key ?>"
+                               data-ui-id="sales-order-address-form-container-form-fieldset-element-text-<?= $key ?>"
+                               value="<?= $value ?>" class="input-text admin__control-text" type="text">
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </form>
+    </div>
+    <div id="origin-address-modal" style="display: none">
+        <form action="<?= $block->escapeUrl($block->getFormUrl()) ?>" method="post" id="order-view-add-warranty-form">
+            <?php foreach ($originAddress['data'] as $key => $value): ?>
+                <div class="admin__field field field-<?= $key ?>"
+                     data-ui-id="sales-order-address-form-container-form-fieldset-element-form-field-<?= $key ?>">
+                    <label class="label admin__field-label" for="<?= $key ?>"
+                           data-ui-id="sales-order-address-form-container-form-fieldset-element-text-<?= $key ?>-label"><span><?= $key ?></span></label>
+                    <div class="admin__field-control control">
+                        <input id="<?= $key ?>" name="<?= $key ?>"
+                               data-ui-id="sales-order-address-form-container-form-fieldset-element-text-<?= $key ?>"
+                               value="<?= $value ?>" class="input-text admin__control-text" type="text">
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </form>
+    </div>
+    <div id="destination-address-modal" style="display: none">
+        <form action="<?= $block->escapeUrl($block->getFormUrl()) ?>" method="post" id="order-view-add-warranty-form">
+            <?php foreach ($destinationAddress['data'] as $key => $value): ?>
+                <div class="admin__field field field-<?= $key ?>"
+                     data-ui-id="sales-order-address-form-container-form-fieldset-element-form-field-<?= $key ?>">
+                    <label class="label admin__field-label" for="<?= $key ?>"
+                           data-ui-id="sales-order-address-form-container-form-fieldset-element-text-<?= $key ?>-label"><span><?= $key ?></span></label>
+                    <div class="admin__field-control control">
+                        <input id="<?= $key ?>" name="<?= $key ?>"
+                               data-ui-id="sales-order-address-form-container-form-fieldset-element-text-<?= $key ?>"
+                               value="<?= $value ?>" class="input-text admin__control-text" type="text">
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </form>
+    </div>
+</form>
+
+<script>
+    require([
+        "jquery",
+        "Magento_Ui/js/modal/alert",
+        'Magento_Ui/js/modal/modal',
+        "prototype"
+    ], function (jQuery, alert, modal) {
+
+//<![CDATA[
+        window.submitShipment = function (btn) {
+            if (!validQtyItems()) {
+                alert({
+                    content: '<?= $block->escapeJs($block->escapeHtml(__('Invalid value(s) for Qty to Ship'))) ?>'
+                });
+                return;
+            }
+            jQuery('#edit_form').submit();
+        }
+        window.validQtyItems = function () {
+            var valid = true;
+            var zeroValuesCount = 0;
+            var itemsCount = 0;
+            $$('.qty-item').each(function (item) {
+                var val = parseFloat(item.value);
+                let maxQty = parseFloat(jQuery('.max-qty-for-' + item.name.substring(0, item.name.length - 4)).text())
+                if (isNaN(val) || val < 0 || val > maxQty) {
+                    valid = false;
+                }
+                if (val === 0) {
+                    zeroValuesCount++;
+                }
+                itemsCount++;
+            });
+            return valid && itemsCount !== zeroValuesCount;
+        }
+//]]>
+
+        /*
+        var popup = modal(options, jQuery('#popup-modal'));
+        jQuery("#origin-address-edit").click(function() {
+            jQuery("#popup-modal").modal('openModal');
+        });
+
+        $jQuery('#order-view-add-warranty').click(function () {
+            jQuery('#order-view-add-warranty-form').append(jQuery('<input>', {
+                'name': 'form_key',
+                'value': window.FORM_KEY,
+                'type': 'hidden'
+            }));
+            jQuery('#order-view-add-warranty-form').submit();
+
+        });
+        */
+        var popup = modal({
+            type: 'popup',
+            responsive: true,
+            innerScroll: true,
+            title: 'Origin Address',
+            modalClass: 'custom-modal',
+            buttons: [
+                {
+                    text: 'Close',
+                    class: '',
+                    click: function () {
+                        this.closeModal();
+                    }
+                },
+                {
+                    text: 'Submit',
+                    class: 'primary',
+                    click: function () {
+                        let newAddressObj = {};
+                        let newAddressTemplate = "<?=$addressTemplate?>";
+                        var newAddressInput = '';
+                        jQuery.each(jQuery("#origin-address-modal :input"), function (key, input) {
+                            let inputObj = jQuery(input);
+                            let field = inputObj.attr('name');
+                            let value = inputObj.attr('value');
+                            newAddressInput = newAddressInput + field + '-' + value + ';';
+                            newAddressTemplate = newAddressTemplate.replace('%' + field, value);
+                        });
+                        newAddressInput = newAddressInput.substring(0, newAddressInput.length - 1)
+                        jQuery('#origin-address-input').val(newAddressInput)
+                        jQuery('#origin-address-template').html(newAddressTemplate);
+                        this.closeModal();
+                    }
+                }]
+        }, jQuery('#origin-address-modal'));
+
+        jQuery("#origin-address-edit").click(function () {
+            jQuery("#origin-address-modal").modal('openModal');
+        });
+
+        var popup2 = modal({
+            type: 'popup',
+            responsive: true,
+            innerScroll: true,
+            title: 'Destination Address',
+            modalClass: 'custom-modal',
+            buttons: [
+                {
+                    text: 'Close',
+                    class: '',
+                    click: function () {
+                        this.closeModal();
+                    }
+                },
+                {
+                    text: 'Submit',
+                    class: 'primary',
+                    click: function () {
+                        let newAddressObj = {};
+                        let newAddressTemplate = "<?=$addressTemplate?>";
+                        var newAddressInput = '';
+                        jQuery.each(jQuery("#destination-address-modal :input"), function (key, input) {
+                            let inputObj = jQuery(input);
+                            let field = inputObj.attr('name');
+                            let value = inputObj.attr('value');
+                            newAddressInput = newAddressInput + field + '-' + value + ';';
+                            newAddressTemplate = newAddressTemplate.replace('%' + field, value);
+                        });
+                        newAddressInput = newAddressInput.substring(0, newAddressInput.length - 1)
+                        jQuery('#destination-address-input').val(newAddressInput)
+                        jQuery('#destination-address-template').html(newAddressTemplate);
+                        this.closeModal();
+                    }
+                }]
+        }, jQuery('#destination-address-modal'));
+        jQuery("#destination-address-edit").click(function () {
+            jQuery("#destination-address-modal").modal('openModal');
+        });
+    });
+</script>
+

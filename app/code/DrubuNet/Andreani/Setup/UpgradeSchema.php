@@ -7,6 +7,9 @@
 
 namespace DrubuNet\Andreani\Setup;
 
+use DrubuNet\Andreani\Api\Data\RLAddressInterface;
+use DrubuNet\Andreani\Api\Data\RLItemInterface;
+use DrubuNet\Andreani\Api\Data\RLOrderInterface;
 use Magento\Framework\Setup\UpgradeSchemaInterface;
 use Magento\Framework\Setup\SchemaSetupInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
@@ -22,6 +25,9 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
         if(version_compare($context->getVersion(), '2.0.0', '<')) {
             $this->upgradeTo200($setup);
+        }
+        if(version_compare($context->getVersion(), '2.0.2', '<')) {
+            $this->upgradeTo202($setup);
         }
         $setup->endSetup();
     }
@@ -118,5 +124,87 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 'default' => null
             ]);
         }
+    }
+
+    private function upgradeTo202(SchemaSetupInterface $setup)
+    {
+        if(!$setup->tableExists("drubunet_andreani_logisticainversa")) {
+            $drubunetAndreaniLogisticaInversa = $setup->getConnection()
+                ->newTable($setup->getTable('drubunet_andreani_logisticainversa'))
+                ->addColumn(
+                    RLOrderInterface::ID,
+                    Table::TYPE_INTEGER,
+                    6,
+                    ['identity' => true, 'nullable' => false, 'primary' => true]
+                )
+                ->addColumn(RLOrderInterface::ORDER_ID, Table::TYPE_INTEGER, 6, ['nullable' => false])
+                ->addColumn(RLOrderInterface::OPERATION, Table::TYPE_TEXT, 20, ['nullable' => false])
+                ->addColumn(RLOrderInterface::OPERATION_LABEL, Table::TYPE_TEXT, 30, ['nullable' => false])
+                ->addColumn(RLOrderInterface::TRACKING_NUMBER, Table::TYPE_TEXT, 30, ['nullable' => false])
+                ->addColumn(RLOrderInterface::LINKING, Table::TYPE_TEXT, 400, ['nullable' => false])
+                ->addColumn(RLOrderInterface::ORIGIN_ADDRESS_ID, Table::TYPE_INTEGER, 10, ['nullable' => false])
+                ->addColumn(RLOrderInterface::DESTINATION_ADDRESS_ID, Table::TYPE_INTEGER, 10, ['nullable' => false])
+                ->addColumn(RLOrderInterface::CREATED_AT, Table::TYPE_TIMESTAMP, null, ['nullable' => false, 'default' => Table::TIMESTAMP_INIT])
+                ->addIndex(
+                    $setup->getIdxName('drubunet_andreani_logisticainversa', [RLOrderInterface::ID]),
+                    [RLOrderInterface::ID]
+                );
+
+            $setup->getConnection()->createTable($drubunetAndreaniLogisticaInversa);
+        }
+        if(!$setup->tableExists("drubunet_andreani_logisticainversa_direcciones")) {
+            $drubunetAndreaniLogisticaInversaDirecciones = $setup->getConnection()
+                ->newTable($setup->getTable('drubunet_andreani_logisticainversa_direcciones'))
+                ->addColumn(
+                    RLAddressInterface::ID,
+                    Table::TYPE_INTEGER,
+                    10,
+                    ['identity' => true, 'nullable' => false, 'primary' => true])
+                ->addColumn(RLAddressInterface::ADDRESS_TYPE, Table::TYPE_SMALLINT, 1, ['nullable' => false])
+                ->addColumn(RLAddressInterface::CUSTOMER_FIRSTNAME, Table::TYPE_TEXT, 20, ['nullable' => false])
+                ->addColumn(RLAddressInterface::CUSTOMER_LASTNAME, Table::TYPE_TEXT, 20, ['nullable' => false])
+                ->addColumn(RLAddressInterface::CUSTOMER_VAT_ID, Table::TYPE_TEXT, 10, ['nullable' => false])
+                ->addColumn(RLAddressInterface::CUSTOMER_TELEPHONE, Table::TYPE_TEXT, 10, ['nullable' => false])
+
+                ->addColumn(RLAddressInterface::ADDRESS_STREET, Table::TYPE_TEXT, 100, ['nullable' => false])
+                ->addColumn(RLAddressInterface::ADDRESS_NUMBER, Table::TYPE_TEXT, 10, ['nullable' => false])
+                ->addColumn(RLAddressInterface::ADDRESS_FLOOR, Table::TYPE_TEXT, 40, ['nullable' => true])
+                ->addColumn(RLAddressInterface::ADDRESS_APARTMENT, Table::TYPE_TEXT, 40, ['nullable' => true])
+                ->addColumn(RLAddressInterface::ADDRESS_BETWEEN_STREETS, Table::TYPE_TEXT, 100, ['nullable' => true])
+                ->addColumn(RLAddressInterface::ADDRESS_OBSERVATIONS, Table::TYPE_TEXT, 100, ['nullable' => true])
+                ->addColumn(RLAddressInterface::ADDRESS_POSTCODE, Table::TYPE_TEXT, 20, ['nullable' => false])
+                ->addColumn(RLAddressInterface::ADDRESS_CITY, Table::TYPE_TEXT, 100, ['nullable' => false])
+                ->addColumn(RLAddressInterface::ADDRESS_REGION, Table::TYPE_TEXT, 100, ['nullable' => false])
+                ->addColumn(RLAddressInterface::ADDRESS_COUNTRY, Table::TYPE_TEXT, 100, ['nullable' => false])
+                ->addColumn(RLAddressInterface::CREATED_AT, Table::TYPE_TIMESTAMP, null, ['nullable' => false, 'default' => Table::TIMESTAMP_INIT])
+                ->addIndex(
+                    $setup->getIdxName('drubunet_andreani_logisticainversa_direcciones', [RLAddressInterface::ID]),
+                    [RLAddressInterface::ID]
+                );
+
+            $setup->getConnection()->createTable($drubunetAndreaniLogisticaInversaDirecciones);
+        }
+        if(!$setup->tableExists("drubunet_andreani_logisticainversa_productos")) {
+            $drubunetAndreaniLogisticaInversaProductos = $setup->getConnection()
+                ->newTable($setup->getTable('drubunet_andreani_logisticainversa_productos'))
+                ->addColumn(
+                    RLItemInterface::ID,
+                    Table::TYPE_INTEGER,
+                    10,
+                    ['identity' => true, 'nullable' => false, 'primary' => true])
+                ->addColumn(RLItemInterface::PARENT_ID, Table::TYPE_INTEGER, 6, ['nullable' => false])
+                ->addColumn(RLItemInterface::SKU, Table::TYPE_TEXT, 100, ['nullable' => false])
+                ->addColumn(RLItemInterface::NAME, Table::TYPE_TEXT, 100, ['nullable' => false])
+                ->addColumn(RLItemInterface::QTY, Table::TYPE_SMALLINT, 3, ['nullable' => false])
+                ->addColumn(RLItemInterface::CREATED_AT, Table::TYPE_TIMESTAMP, null, ['nullable' => false, 'default' => Table::TIMESTAMP_INIT])
+                ->addIndex(
+                    $setup->getIdxName('drubunet_andreani_logisticainversa_productos', [RLItemInterface::ID]),
+                    [RLItemInterface::ID]
+                );
+
+            $setup->getConnection()->createTable($drubunetAndreaniLogisticaInversaProductos);
+        }
+
+
     }
 }

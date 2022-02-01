@@ -86,6 +86,9 @@ class StandardDelivery extends AbstractCarrier implements CarrierInterface
         if (!$this->getConfigFlag('active')) {
             return false;
         }
+        if($request->getPackageWeight() > 50){
+            return false;
+        }
 
         /** @var Result $result */
         $result = $this->_rateResultFactory->create();

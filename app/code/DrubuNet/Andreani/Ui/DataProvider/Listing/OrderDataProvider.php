@@ -49,6 +49,7 @@ class OrderDataProvider extends \Magento\Ui\DataProvider\AbstractDataProvider
             $methodsCondition =
                 '\'' . \DrubuNet\Andreani\Model\Carrier\PickupDelivery::CARRIER_CODE . '_' . \DrubuNet\Andreani\Model\Carrier\PickupDelivery::METHOD_CODE . '\', ' .
                 '\'' . \DrubuNet\Andreani\Model\Carrier\StandardDelivery::CARRIER_CODE . '_' . \DrubuNet\Andreani\Model\Carrier\StandardDelivery::METHOD_CODE . '\', ' .
+                '\'' . \DrubuNet\Andreani\Model\Carrier\BiggerDelivery::CARRIER_CODE . '_' . \DrubuNet\Andreani\Model\Carrier\BiggerDelivery::METHOD_CODE . '\', ' .
                 '\'' . \DrubuNet\Andreani\Model\Carrier\PriorityDelivery::CARRIER_CODE . '_' . \DrubuNet\Andreani\Model\Carrier\PriorityDelivery::METHOD_CODE . '\'';
 
             $select->where("ss.order_id IS NULL and so.shipping_method in ($methodsCondition)");

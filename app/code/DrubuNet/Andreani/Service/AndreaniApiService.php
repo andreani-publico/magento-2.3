@@ -93,8 +93,14 @@ class AndreaniApiService
      * @param string $tracking
      * @return DataObject
      */
-    public function getLabel($tracking){
-        $labelUrl = str_replace('{numeroAndreani}',$tracking,$this->helper->getLabelUrl());
+    public function getLabel($labelData, $isUrl = false){
+        if(!$isUrl) {
+            $tracking = $labelData;
+            $labelUrl = str_replace('{numeroAndreani}', $tracking, $this->helper->getLabelUrl());
+        }
+        else{
+            $labelUrl = $labelData;
+        }
         if(empty($this->token)){
             $this->login();
         }
