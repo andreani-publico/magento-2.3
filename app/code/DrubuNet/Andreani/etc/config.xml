@@ -40,6 +40,20 @@
                 <handling_type>F</handling_type>
                 <handling_fee>0.00</handling_fee>
             </andreanisucursal>
+            <andreanibigger>
+                <active>1</active>
+                <model>DrubuNet\Andreani\Model\Carrier\BiggerDelivery</model>
+                <name>Envio a domicilio para pedidos > 50kg</name>
+                <sort_order>3</sort_order>
+                <title>Andreani</title>
+                <contract>400006710</contract>
+                <sallowspecific>0</sallowspecific>
+                <showmethod>1</showmethod>
+                <specificerrmsg>This shipping method is not available. To use this shipping method, please contact us.</specificerrmsg>
+                <type>I</type>
+                <handling_type>F</handling_type>
+                <handling_fee>0.00</handling_fee>
+            </andreanibigger>
             <andreaniurgente>
                 <active>1</active>
                 <model>DrubuNet\Andreani\Model\Carrier\PriorityDelivery</model>

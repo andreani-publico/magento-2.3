@@ -178,6 +178,22 @@ class Data extends AbstractHelper
         return boolval($this->getConfig(self::SHIPPING_SECTION . 'debug_mode'));
     }
 
+    public function getAttributeHeight(){
+        return $this->getConfig(self::SHIPPING_SECTION . 'attributes_mapping/selected_height');
+    }
+
+    public function getAttributeLength(){
+        return $this->getConfig(self::SHIPPING_SECTION . 'attributes_mapping/selected_length');
+    }
+
+    public function getAttributeWidth(){
+        return $this->getConfig(self::SHIPPING_SECTION . 'attributes_mapping/selected_width');
+    }
+
+    public function getRlContractByType($type){
+        return $this->getConfig(self::SHIPPING_SECTION . $type);
+    }
+
     /*
      * Shipping method config
      */

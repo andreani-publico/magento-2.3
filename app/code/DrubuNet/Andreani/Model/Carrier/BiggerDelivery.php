@@ -7,17 +7,18 @@
 
 namespace DrubuNet\Andreani\Model\Carrier;
 
-use Magento\Checkout\Model\Session;
+use DrubuNet\Andreani\Model\ShippingProcessor;
 use Magento\Framework\DataObject;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use Magento\Shipping\Model\Carrier\AbstractCarrier;
 use Magento\Shipping\Model\Carrier\CarrierInterface;
 use Magento\Shipping\Model\Rate\Result;
 
-class PickupDelivery extends AbstractCarrier implements CarrierInterface
+class BiggerDelivery extends AbstractCarrier implements CarrierInterface
 {
-    const CARRIER_CODE = 'andreanisucursal';
-    const METHOD_CODE = 'sucursal';
+    const CARRIER_CODE = 'andreanibigger';
+    const METHOD_CODE = 'bigger';
     /**
      * @var string
      */
@@ -38,14 +39,14 @@ class PickupDelivery extends AbstractCarrier implements CarrierInterface
     protected $_rateMethodFactory;
 
     /**
+     * @var ShippingProcessor
+     */
+    protected $shippingProcessor ;
+
+    /**
      * @var \DrubuNet\Andreani\Helper\Data
      */
     protected $andreaniHelper;
-
-    /**
-     * @var Session
-     */
-    protected $checkoutSession;
 
     /**
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
@@ -62,14 +63,14 @@ class PickupDelivery extends AbstractCarrier implements CarrierInterface
         \Psr\Log\LoggerInterface $logger,
         \Magento\Shipping\Model\Rate\ResultFactory $rateResultFactory,
         \Magento\Quote\Model\Quote\Address\RateResult\MethodFactory $rateMethodFactory,
+        \DrubuNet\Andreani\Model\ShippingProcessor $shippingProcessor,
         \DrubuNet\Andreani\Helper\Data $andreaniHelper,
-        Session $checkoutSession,
         array $data = []
     ) {
         $this->_rateResultFactory = $rateResultFactory;
         $this->_rateMethodFactory = $rateMethodFactory;
+        $this->shippingProcessor = $shippingProcessor;
         $this->andreaniHelper = $andreaniHelper;
-        $this->checkoutSession = $checkoutSession;
         parent::__construct($scopeConfig, $rateErrorFactory, $logger, $data);
     }
     /**
@@ -85,7 +86,7 @@ class PickupDelivery extends AbstractCarrier implements CarrierInterface
         if (!$this->getConfigFlag('active')) {
             return false;
         }
-        if($request->getPackageWeight() > 50){
+        if($request->getPackageWeight() <= 50){
             return false;
         }
 
@@ -98,6 +99,7 @@ class PickupDelivery extends AbstractCarrier implements CarrierInterface
             $method = $this->createResultMethod($shippingPrice);
             $result->append($method);
         }
+
         return $result;
     }
 
@@ -120,15 +122,14 @@ class PickupDelivery extends AbstractCarrier implements CarrierInterface
     private function getShippingPrice(RateRequest $request)
     {
         $shippingPrice = false;
-        $this->checkoutSession->setFreeShipping($request->getFreeShipping());
-        if(!$request->getFreeShipping()){
-            if($this->checkoutSession->getCotizacionAndreaniSucursal()) {
-                $shippingPrice = $this->checkoutSession->getCotizacionAndreaniSucursal();
+        if(!$request->getFreeShipping()) {
+            $rate = $this->shippingProcessor->getRate($request->getAllItems(), $request->getDestPostcode(),\DrubuNet\Andreani\Model\Carrier\BiggerDelivery::CARRIER_CODE);
+            if($rate->getStatus()){
+                $shippingPrice = $rate->getPrice();
             }
-            else{
-                $shippingPrice = 0;
+            if(!is_bool($shippingPrice)) {
+                $shippingPrice = $this->getFinalPriceWithHandlingFee($shippingPrice);
             }
-            $shippingPrice = $this->getFinalPriceWithHandlingFee($shippingPrice);
         }
         else{
             $shippingPrice = 0;
@@ -150,8 +151,10 @@ class PickupDelivery extends AbstractCarrier implements CarrierInterface
 
         $method->setCarrier(self::CARRIER_CODE);
         $method->setCarrierTitle($this->getConfigData('title'));
+
         $method->setMethod(self::METHOD_CODE);
         $method->setMethodTitle($this->getConfigData('name'));
+
         $method->setPrice($shippingPrice);
         $method->setCost($shippingPrice);
         return $method;

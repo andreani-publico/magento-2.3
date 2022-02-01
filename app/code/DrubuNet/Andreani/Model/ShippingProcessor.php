@@ -10,6 +10,7 @@ namespace DrubuNet\Andreani\Model;
 
 use DrubuNet\Andreani\Service\AndreaniApiService;
 use Magento\Framework\DataObject;
+use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Api\ShipOrderInterfaceFactory;
 use Magento\Shipping\Model\Shipping\LabelGenerator;
 use Magento\Shipping\Model\Shipping\LabelGeneratorFactory;
@@ -51,6 +52,19 @@ class ShippingProcessor
      */
     private $shipmentRepositoryFactory;
 
+    /**
+     * @var ReverseLogisticsRepository
+     */
+    private $reverseLogisticsRepository;
+    /**
+     * @var OrderRepositoryInterface
+     */
+    private $orderRepository;
+    /**
+     * @var \Magento\Catalog\Api\ProductRepositoryInterface
+     */
+    private $productRepository;
+
     public function __construct(
         \DrubuNet\Andreani\Helper\Data $andreaniHelper,
         AndreaniApiService $andreaniApiService,
@@ -58,7 +72,10 @@ class ShippingProcessor
         ShipOrderInterfaceFactory $shipOrderFactory,
         \Magento\Sales\Api\Data\ShipmentTrackCreationInterfaceFactory $shipmentTrackCreationFactory,
         \Magento\Sales\Api\ShipmentRepositoryInterfaceFactory $shipmentRepositoryFactory,
-        LabelGeneratorFactory $labelGeneratorFactory
+        LabelGeneratorFactory $labelGeneratorFactory,
+        \DrubuNet\Andreani\Model\ReverseLogisticsRepository $reverseLogisticsRepository,
+        OrderRepositoryInterface $orderRepository,
+        \Magento\Catalog\Api\ProductRepositoryInterface $productRepository
     )
     {
         $this->andreaniHelper = $andreaniHelper;
@@ -68,6 +85,9 @@ class ShippingProcessor
         $this->shipmentTrackCreationFactory = $shipmentTrackCreationFactory;
         $this->labelGeneratorFactory = $labelGeneratorFactory;
         $this->shipmentRepositoryFactory = $shipmentRepositoryFactory;
+        $this->reverseLogisticsRepository = $reverseLogisticsRepository;
+        $this->orderRepository = $orderRepository;
+        $this->productRepository = $productRepository;
     }
 
     /**
@@ -77,7 +97,7 @@ class ShippingProcessor
      * @param string $store_id
      * @return DataObject
      */
-    public function getRate($items, $zip, $method, $store_id = ''){
+    public function getRate($items, $zip, $method){
         $rate = new DataObject();
         $price = -1;
         $status = false;
@@ -87,7 +107,7 @@ class ShippingProcessor
                 "cpDestino" => $zip,//CP de la sucursal, viene en la info
                 "contrato" => $this->andreaniHelper->getContractByType($method),//nro contrato, config,
                 "cliente" => $this->andreaniHelper->getClientNumber(),//Codigo cliente, config,
-                "sucursalOrigen" => $store_id,//Codigo sucursal
+                "sucursalOrigen" => '',//Codigo sucursal
                 "bultos" => [
                     [
                         "valorDeclarado" => $packageWeight['amount'],//total de la compra
@@ -134,14 +154,14 @@ class ShippingProcessor
         return $rate;
     }
 
-    public function getLabel($tracking){
+    public function getLabel($labelData, $isUrl = false){
         $label = null;
         try{
-            $label = $this->andreaniApiService->getLabel($tracking);
+            $label = $this->andreaniApiService->getLabel($labelData, $isUrl);
         }catch (\Exception $e){
             $logMessage = "Method: getLabel\n";
             $logMessage .= "Status: with errors\n";
-            $logMessage .= "Request: $tracking\n";
+            $logMessage .= "Request: $labelData\n";
             $logMessage .= "Message: " . $e->getMessage() . "\n";
             \DrubuNet\Andreani\Helper\Data::log($logMessage, 'andreani_rest_' . date('Y_m') . '.log');
         }
@@ -403,6 +423,155 @@ class ShippingProcessor
         catch (\Exception $e){
             $shipmentResult->setMessage($e->getMessage());
         }
+        return $shipmentResult;
+    }
+
+    public function generateAndreaniRLShipping($data){
+        $shipmentResult = new \Magento\Framework\DataObject;
+        $shipmentResult->setStatus(false);
+        $order = $this->orderRepository->get($data['order_id']);
+        $itemsSelected = $data['items'];
+        $contract = $this->andreaniHelper->getRlContractByType(explode('_',$data['operation'])[0] . '_contract');
+        $rlOrderItems = [];
+        $orderItemsFiltered = [];
+        foreach ($order->getAllItems() as $item){
+            if(array_key_exists($item->getSku(),$itemsSelected)){
+                if($item->getProductType() != 'simple') {
+                    continue;
+                }
+                $qtySelected = $itemsSelected[$item->getSku()];
+                $item = $item->setQtyOrdered($qtySelected);
+                $orderItemsFiltered[] = $item;
+                $rlOrderItems[] = ['sku' => $item->getSku(), 'qty' => $qtySelected, 'name' => $item->getName()];
+            }
+        }
+        $data['items'] = $rlOrderItems;
+        $packageWeight = $this->getPackageWeightByItems($orderItemsFiltered);
+        $params = array(
+            "contrato" => $contract,
+            "origen" => array(
+                "postal" => array(
+                    "codigoPostal" =>$data['origin_address']['postcode'],
+                    "calle" => $data['origin_address']['street'],
+                    "numero" => $data['origin_address']['number'],
+                    "localidad" => $data['origin_address']['city'],
+                    "region" => $data['origin_address']['region'],
+                    "pais" => $data['origin_address']['country'],
+                )
+            ),
+            "destino" => [
+                "postal" => array(
+                    "codigoPostal" => $data['destination_address']['postcode'],
+                    "calle" => $data['destination_address']['street'],
+                    "numero" => $data['destination_address']['number'],
+                    "localidad" => $data['destination_address']['city'],
+                    "region" => $data['destination_address']['region'],
+                    "pais" => "Argentina",
+                    "componentesDeDireccion" => [
+
+                    ]
+                )
+            ],
+            "remitente" => array(
+                "nombreCompleto" => $data['origin_address']['customer_firstname'] . ' ' . $data['origin_address']['customer_lastname'],
+                "email" => $this->andreaniHelper->getSenderEmail(),
+                "documentoTipo" => $this->andreaniHelper->getSenderIdType(),
+                "documentoNumero" => $data['origin_address']['customer_vat_id'],
+                "telefonos" => [
+                    array(
+                        "tipo" => intval($this->andreaniHelper->getSenderPhoneType()),
+                        "numero" => $data['origin_address']['customer_telephone']
+                    )
+                ]
+            ),
+            "destinatario" => [
+                array(
+                    "nombreCompleto" => $data['destination_address']['customer_firstname'] . ' ' . $data['destination_address']['customer_lastname'],
+                    "email" => $order->getCustomerEmail(),
+                    "documentoTipo" => "DNI",
+                    "documentoNumero" => $data['destination_address']['customer_vat_id'],
+                    "telefonos" => [
+                        array(
+                            "tipo" => 1,
+                            "numero" => $data['destination_address']['customer_telephone']
+                        )
+                    ]
+                ),
+            ],
+            "bultos" => [
+                array(
+                    "kilos" => $packageWeight['weight'],
+
+                    "volumenCm" => $packageWeight['volume'],
+                    "valorDeclaradoSinImpuestos" => floatval($packageWeight['amount']),
+                    //"valorDeclaradoConImpuestos" => 1452,
+                    "referencias" => [
+                        array(
+                            "meta" => "idCliente",
+                            "contenido" => $order->getIncrementId()
+                        ),
+                        array(
+                            "meta" => "observaciones",
+                            "contenido" => substr($packageWeight['names'],0,255)
+                        ),
+                    ]
+                )
+            ]
+        );
+
+        if($data['destination_address']['floor'] != ''){
+            $params['destino']['postal']['componentesDeDireccion'][] = array(
+                "meta" => "piso",
+                "contenido" => $data['destination_address']['floor']
+            );
+        }
+        if($data['destination_address']['apartment'] != ''){
+            $params['destino']['postal']['componentesDeDireccion'][] = array(
+                "meta" => "departamento",
+                "contenido" => $data['destination_address']['apartment']
+            );
+        }
+
+        $response = $this->andreaniApiService->createOrder(new DataObject($params));
+
+        if (!is_array($response)) {
+            if ($this->andreaniHelper->isDebugEnable()) {
+                $logMessage = "\nOrder #{$order->getIncrementId()}\n";
+                $logMessage .= "Method: createRLOrder\n";
+                $logMessage .= "Status: with errors\n";
+                $logMessage .= "Request: " . json_encode($params) . "\n";
+                $logMessage .= "Response: " . json_encode($response) . "\n";
+                \DrubuNet\Andreani\Helper\Data::log($logMessage, 'andreani_errores_rest_' . date('Y_m') . '.log');
+            }
+            $shipmentResult->setMessage($response);
+            return $shipmentResult;
+        } else {
+            if ($this->andreaniHelper->isDebugEnable()) {
+                $logMessage = "\nOrder #{$order->getIncrementId()}\n";
+                $logMessage .= "Method: createRLOrder\n";
+                $logMessage .= "Status: successful\n";
+                $logMessage .= "Request: " . json_encode($params) . "\n";
+                $logMessage .= "Response: " . json_encode($response) . "\n";
+                \DrubuNet\Andreani\Helper\Data::log($logMessage, 'andreani_rest_' . date('Y_m') . '.log');
+            }
+            $shipmentResult->setStatus(true);
+        }
+
+        $linkingData = [];
+        $tracks = [];
+        if (count($response['bultos']) > 0) {
+            foreach ($response['bultos'] as $bulto) {
+                $tracks[] = $bulto['numeroDeEnvio'];
+                if(array_key_exists('linking', $bulto) && is_array($bulto['linking'])) {
+                    foreach ($bulto['linking'] as $linking) {
+                        $linkingData[] = $linking['contenido'];
+                    }
+                }
+            }
+        }
+        $data['tracking_number'] = implode(',', $tracks);
+        $data['linking'] = $linkingData;
+        $this->reverseLogisticsRepository->setAndSaveOrderData($data);
         return $shipmentResult;
     }
 

@@ -89,7 +89,7 @@ define([
                         store_id: checkoutConfig.andreani.stores[this.selectedProvince()][this.selectedCity()][this.selectedStore()].codigo,
                         store_name: this.selectedStore(),
                         quote_id: quote.getQuoteId(),
-                        address_zip: quote.shippingAddress().postcode
+                        address_zip: checkoutConfig.andreani.stores[this.selectedProvince()][this.selectedCity()][this.selectedStore()].direccion.codigoPostal
                     },
                     complete: function (response) {
                         if(response.status == 200 && response.responseJSON.status){

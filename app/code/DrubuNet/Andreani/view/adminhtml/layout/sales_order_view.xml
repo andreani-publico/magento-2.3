@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+
+<!--
+  ~ @author Drubu Team
+  ~ @copyright Copyright (c) 2021 Drubu
+  ~ @package DrubuNet_Andreani
+  -->
+
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="sales_order_tabs">
+            <block class="DrubuNet\Andreani\Block\Adminhtml\Order\Tab\ReverseLogistics" name="andreani_reverse_logistics.grid.container"/>
+            <action method="addTabAfter">
+                <argument name="name" xsi:type="string">andreani_tabs</argument>
+                <argument name="block" xsi:type="string">andreani_reverse_logistics.grid.container</argument>
+                <argument name="after" xsi:type="string">tabid</argument>
+            </action>
+        </referenceBlock>
+    </body>
+</page>
+

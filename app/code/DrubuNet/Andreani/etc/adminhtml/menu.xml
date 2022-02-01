@@ -13,15 +13,6 @@
             sortOrder="70"
             resource="Magento_Config::brand"
         />
-<!--        <add-->
-<!--            id="DrubuNet_Andreani::tarifa_admin"-->
-<!--            title="Administracion de tarifas por tabla"-->
-<!--            module="DrubuNet_Andreani"-->
-<!--            sortOrder="100"-->
-<!--            parent="DrubuNet_Andreani::menuPrincipal"-->
-<!--            action="andreani/rate/index"-->
-<!--            resource="DrubuNet_Andreani::rate_operations"-->
-<!--        />-->
         <add
             id="DrubuNet_Andreani::guias"
             title="Generación masiva de guías"
