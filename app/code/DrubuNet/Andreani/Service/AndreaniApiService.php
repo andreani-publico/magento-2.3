@@ -146,15 +146,25 @@ class AndreaniApiService
         $curl = curl_init();
         $headers = [];
 
+        $defaultHeaders = [
+            'Content-Type: application/json'
+        ];
+
+        // Merge default headers with any provided headers
+        if (isset($params['header'])) {
+            $headers = array_merge($defaultHeaders, $params['header']);
+        } else {
+            $headers = $defaultHeaders;
+        }
+
         curl_setopt_array($curl, array(
             CURLOPT_URL => $uri,
             CURLOPT_TIMEOUT => 30,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_CUSTOMREQUEST => $requestMethod,
+            CURLOPT_HTTPHEADER => $headers,
         ));
-        if(isset($params['header'])){
-            curl_setopt($curl, CURLOPT_HTTPHEADER, $params['header']);
-        }
+
         if(isset($params['body'])){
             curl_setopt($curl,CURLOPT_POSTFIELDS, json_encode($params['body']));
         }
