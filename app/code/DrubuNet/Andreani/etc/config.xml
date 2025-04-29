@@ -70,7 +70,7 @@
                     <label>https://api.andreani.com/v2/ordenes-de-envio/{numeroAndreani}/etiquetas</label>
                     <shippingByNumber>https://api.andreani.com/v1/envios/{numeroAndreani}</shippingByNumber>
                     <provinces>https://api.andreani.com/v1/regiones</provinces>
-                    <locations>https://apis.andreani.com/v2/sucursales?canal=B2C&seHaceAtencionAlCliente=true</locations>
+                    <locations>https://apis.andreani.com/v2/sucursales?canal=B2C&#38;seHaceAtencionAlCliente=true</locations>
                 </andreani_rest_prod_urls>
                 <andreani_rest_dev_urls>
                     <login>https://api.qa.andreani.com/login</login>
