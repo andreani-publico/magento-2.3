@@ -1,0 +1,16 @@
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="admin.scope.col.wrap"/>
+        <referenceContainer name="content">
+            <block class="DrubuNet\Andreani\Block\Adminhtml\ReverseLogistics\Create" name="andreani_reverselogistic_create">
+                <block class="DrubuNet\Andreani\Block\Adminhtml\ReverseLogistics\Create\Form" name="form" template="DrubuNet_Andreani::create/form.phtml">
+                    <block class="DrubuNet\Andreani\Block\Adminhtml\Order\View\Info" name="order_info" template="DrubuNet_Andreani::order/view/info.phtml">
+                        <container name="extra_customer_info"/>
+                    </block>
+                    <!--<block class="DrubuNet\Andreani\Block\Adminhtml\ReverseLogistics\Create\Items" name="order_items" template="DrubuNet_Andreani::create/items.phtml">
+                    </block>-->
+                </block>
+            </block>
+        </referenceContainer>
+    </body>
+</page>

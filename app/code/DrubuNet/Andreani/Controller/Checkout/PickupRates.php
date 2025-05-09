@@ -71,7 +71,7 @@ class PickupRates implements ActionInterface, CsrfAwareActionInterface
         $storeId = $request->getParam('store_id') ? $request->getParam('store_id') : null;
         $addressZip = $request->getParam('address_zip') ? $request->getParam('address_zip') : null;
         $storeName = $request->getParam('store_name') ? $request->getParam('store_name') : null;
-        $rate = $this->shippingProcessor->getRate($this->checkoutSession->getQuote()->getAllItems(), $addressZip, \DrubuNet\Andreani\Model\Carrier\PickupDelivery::CARRIER_CODE, $storeId);
+        $rate = $this->shippingProcessor->getRate($this->checkoutSession->getQuote()->getAllItems(), $addressZip, \DrubuNet\Andreani\Model\Carrier\PickupDelivery::CARRIER_CODE);
 
         if ($this->checkoutSession->getFreeShipping()) {
             $price = 0;
